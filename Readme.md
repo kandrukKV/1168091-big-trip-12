@@ -1,7 +1,7 @@
 # Личный проект «Большое путешествие» [![Build status][travis-image]][travis-url]
 
 * Студент: [Константин Кандрук](https://up.htmlacademy.ru/ecmascript/12/user/1168091).
-* Наставник: `Неизвестно`.
+* Наставник: [Александр Белокур](https://htmlacademy.ru/profile/alex-belokur).
 
 ---
 
