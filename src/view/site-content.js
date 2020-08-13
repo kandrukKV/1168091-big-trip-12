@@ -1,7 +1,7 @@
-export const createContentTemplate = () => {
-  return (
-    ` <ul class="trip-days">
-        <li class="trip-days__item  day"></li>
-      </ul>`
-  );
+const createContentTemplate = () => {
+  return (`
+    <ul class="trip-days"></ul>
+  `);
 };
+
+export {createContentTemplate};
