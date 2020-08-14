@@ -1,6 +1,17 @@
-export const createTripInfoTemplate = () => {
+const getTotal = (routes) => {
+  let total = 0;
+  routes.forEach((routeOfDay) => {
+    routeOfDay.forEach((route) => {
+      total += parseInt(route.price, 10);
+    });
+  });
+  return total;
+};
+
+export const createTripInfoTemplate = (routes) => {
+  const total = getTotal(routes);
   return (
-    `<section class="trip-main__trip-info  trip-info">
+    `<section class="trip-main__trip-info trip-info">
       <div class="trip-info__main">
         <h1 class="trip-info__title">Amsterdam &mdash; Chamonix &mdash; Geneva</h1>
 
@@ -8,8 +19,8 @@ export const createTripInfoTemplate = () => {
       </div>
 
       <p class="trip-info__cost">
-        Total: &euro;&nbsp;<span class="trip-info__cost-value">1230</span>
+        Total: &euro;&nbsp;<span class="trip-info__cost-value">${total}</span>
       </p>
-  </section>`
+    </section>`
   );
 };
