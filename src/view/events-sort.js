@@ -1,6 +1,6 @@
 export const createTripEventsSortTemplate = () => {
-  return (`
-    <form class="trip-events__trip-sort  trip-sort" action="#" method="get">
+  return (
+    `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
         <span class="trip-sort__item  trip-sort__item--day">Day</span>
 
         <div class="trip-sort__item  trip-sort__item--event">
@@ -29,6 +29,6 @@ export const createTripEventsSortTemplate = () => {
         </div>
 
         <span class="trip-sort__item  trip-sort__item--offers">Offers</span>
-    </form>
-  `);
+    </form>`
+  );
 };

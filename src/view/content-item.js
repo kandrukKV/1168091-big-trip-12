@@ -16,19 +16,19 @@ export const createContentItem = (routes, idx) => {
   });
 
   events = events.map((item) => {
-    return (`
-      <li class="trip-events__item">
+    return (
+      `<li class="trip-events__item">
         ${item}
-      </li>
-    `);
+      </li>`
+    );
   });
 
-  return (`
-    <li class="trip-events__item day">
+  return (
+    `<li class="trip-events__item day">
       ${createDayInfoTemplate(dayDate, idx + 1)}
       <ul class="trip-events__list">
         ${events.join(``)}
       </ul>
-    </>
-  `);
+    </>`
+  );
 };
