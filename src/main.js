@@ -36,8 +36,6 @@ const renderEventItem = (eventListComponent, event) => {
   const eventComponent = new Event(event);
   const editFormComponent = new EditFormView(event);
 
-  console.log(eventListComponent.getElement().querySelector(`li`));
-
   const replaceEventToForm = () => {
     eventItemComponent.getElement().replaceChild(editFormComponent.getElement(), eventComponent.getElement());
   };
@@ -46,11 +44,11 @@ const renderEventItem = (eventListComponent, event) => {
     eventItemComponent.getElement().replaceChild(eventComponent.getElement(), editFormComponent.getElement());
   };
 
-  eventItemComponent.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
+  eventComponent.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
     replaceEventToForm();
   });
 
-  editFormComponent.getElement().querySelector(`form`).addEventListener(`submit`, (evt) => {
+  editFormComponent.getElement().addEventListener(`submit`, (evt) => {
     evt.preventDefault();
     replaceFormToEvent();
   });
