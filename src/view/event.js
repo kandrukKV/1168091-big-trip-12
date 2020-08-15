@@ -1,4 +1,4 @@
-import {getPreposition} from '../utils';
+import {createElement, getPreposition} from '../utils';
 
 const OFFERS_COUNT = 3;
 
@@ -17,8 +17,7 @@ const getOffers = (offers) => {
 
 };
 
-
-export const createEventTemplate = (route) => {
+const createEventTemplate = (route) => {
 
   const {type, city, price, offers, date} = route;
 
@@ -53,3 +52,26 @@ export const createEventTemplate = (route) => {
     </div>`
   );
 };
+
+export default class Event {
+  constructor(route) {
+    this._element = null;
+    this._route = route;
+  }
+
+  getTemplate() {
+    return createEventTemplate(this._route);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
