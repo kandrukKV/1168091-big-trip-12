@@ -1,4 +1,4 @@
-import {getPreposition} from '../utils';
+import {createElement, getPreposition} from '../utils';
 
 const DEFAULT_ROUTE = {
   type: `Taxi`,
@@ -36,8 +36,8 @@ const createDestinationTemplate = (destination) => {
   );
 };
 
-export const createEventEditFormTemplate = (route = DEFAULT_ROUTE) => {
-  const {destination, type, city, date, price, isNewEventMode} = route;
+const createEventEditFormTemplate = (route = DEFAULT_ROUTE) => {
+  const {type, city, date, price, isNewEventMode} = route;
   let newEventClass = ``;
   let eventEditBlock = `<button class="event__reset-btn" type="reset">Delete</button>
       <input id="event-favorite-1" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" checked>
@@ -55,6 +55,8 @@ export const createEventEditFormTemplate = (route = DEFAULT_ROUTE) => {
     newEventClass = `trip-events__item `;
     eventEditBlock = `<button class="event__reset-btn" type="reset">Cancel</button>`;
   }
+
+  const destination = null;
 
   const destinationTemplate = createDestinationTemplate(destination);
 
@@ -223,3 +225,26 @@ export const createEventEditFormTemplate = (route = DEFAULT_ROUTE) => {
     </form>`
   );
 };
+
+export default class EditForm {
+  constructor(route) {
+    this._element = null;
+    this._route = route;
+  }
+
+  getTemplate() {
+    return createEventEditFormTemplate(this._route);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

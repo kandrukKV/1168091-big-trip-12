@@ -1,3 +1,5 @@
+import {createElement} from '../utils';
+
 const getTotal = (routes) => {
   let total = 0;
   routes.forEach((routeOfDay) => {
@@ -8,7 +10,7 @@ const getTotal = (routes) => {
   return total;
 };
 
-export const createTripInfoTemplate = (routes) => {
+const createTripInfoTemplate = (routes) => {
   const total = getTotal(routes);
   return (
     `<section class="trip-main__trip-info trip-info">
@@ -24,3 +26,26 @@ export const createTripInfoTemplate = (routes) => {
     </section>`
   );
 };
+
+export default class TripInfo {
+  constructor(routes) {
+    this._element = null;
+    this._route = routes;
+  }
+
+  getTemplate() {
+    return createTripInfoTemplate(this._route);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
