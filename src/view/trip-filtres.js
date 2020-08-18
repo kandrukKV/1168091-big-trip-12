@@ -1,4 +1,4 @@
-import {createElement} from '../utils';
+import AbstractView from './abstract';
 
 const createTripFiltresTemplate = () => {
   return (
@@ -20,24 +20,8 @@ const createTripFiltresTemplate = () => {
   );
 };
 
-export default class FiltersMenu {
-  constructor() {
-    this._element = null;
-  }
-
+export default class FiltersMenu extends AbstractView {
   getTemplate() {
     return createTripFiltresTemplate();
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

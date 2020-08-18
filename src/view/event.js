@@ -1,4 +1,5 @@
-import {createElement, getPreposition} from '../utils';
+import AbstractView from './abstract';
+import {getPreposition} from '../utils/common';
 
 const OFFERS_COUNT = 3;
 
@@ -53,25 +54,24 @@ const createEventTemplate = (route) => {
   );
 };
 
-export default class Event {
+export default class Event extends AbstractView {
   constructor(route) {
-    this._element = null;
+    super();
     this._route = route;
+    this._editClickHandler = this._editClickHandler.bind(this);
   }
 
   getTemplate() {
     return createEventTemplate(this._route);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
+  _editClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.editClick();
   }
 
-  removeElement() {
-    this._element = null;
+  setClickHandler(callback) {
+    this._callback.editClick = callback;
+    this.getElement().addEventListener(`click`, this._editClickHandler);
   }
 }

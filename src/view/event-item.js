@@ -1,4 +1,4 @@
-import {createElement} from '../utils';
+import AbstractView from './abstract';
 
 const createEventItem = () => {
   return (
@@ -6,24 +6,8 @@ const createEventItem = () => {
   );
 };
 
-export default class EventItem {
-  constructor() {
-    this._element = null;
-  }
-
+export default class EventItem extends AbstractView {
   getTemplate() {
     return createEventItem();
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }
