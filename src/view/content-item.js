@@ -1,4 +1,4 @@
-import {createElement} from '../utils';
+import AbstractView from './abstract';
 
 const createContentItem = () => {
 
@@ -7,25 +7,10 @@ const createContentItem = () => {
   );
 };
 
-export default class ContentItem {
-  constructor() {
-    this._element = null;
-  }
+export default class ContentItem extends AbstractView {
 
   getTemplate() {
     return createContentItem();
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 
 }

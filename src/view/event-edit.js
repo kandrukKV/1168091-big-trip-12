@@ -1,4 +1,5 @@
-import {createElement, getPreposition} from '../utils';
+import AbstractView from './abstract';
+import {getPreposition} from '../utils/common';
 
 const DEFAULT_ROUTE = {
   type: `Taxi`,
@@ -226,25 +227,24 @@ const createEventEditFormTemplate = (route = DEFAULT_ROUTE) => {
   );
 };
 
-export default class EditForm {
+export default class EditForm extends AbstractView {
   constructor(route) {
-    this._element = null;
+    super();
     this._route = route;
+    this._submitHandler = this._submitHandler.bind(this);
   }
 
   getTemplate() {
     return createEventEditFormTemplate(this._route);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
+  _submitHandler(evt) {
+    evt.preventDefault();
+    this._callback.submit();
   }
 
-  removeElement() {
-    this._element = null;
+  setSubmitHandler(callback) {
+    this._callback.submit = callback;
+    this.getElement().addEventListener(`submit`, this._submitHandler);
   }
 }
