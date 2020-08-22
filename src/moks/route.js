@@ -1,4 +1,5 @@
 import {getRandomInteger, shuffleArray, getRandomElementOfArray} from '../utils/common';
+import {addZerro} from '../utils/events';
 
 const ROUTE_TYPES = [`Taxi`, `Bus`, `Train`, `Ship`, `Transport`, `Drive`, `Flight`, `Check-in`, `Sightseeing`, `Restaurant`];
 const SITIES = [`Irkutsk`, `Khabarovsk`, `Tomsk`, `Vladivostok`, `Ekaterinburg`, `Ufa`, `Sratov`];
@@ -35,27 +36,6 @@ const getPhotos = () => {
   return photos;
 };
 
-const addZerro = (num) => num <= 9 ? `0` + num : num;
-
-const transformDuration = (time) => {
-  const minutes = Math.floor((time / 1000 / 60) % 60);
-  const hours = Math.floor((time / (1000 * 60 * 60)) % 24);
-  const days = Math.floor((time / (1000 * 60 * 60 * 24)));
-  let duration = ``;
-
-  if (days) {
-    duration += `${addZerro(days)}D `;
-  }
-  if (hours) {
-    duration += `${addZerro(hours)}H `;
-  }
-  if (minutes) {
-    duration += `${addZerro(minutes)}M`;
-  }
-
-  return duration;
-};
-
 const getDate = () => {
   const currentDate = new Date();
 
@@ -73,7 +53,7 @@ const getDate = () => {
   currentDate.setHours(getRandomInteger(0, 23), getRandomInteger(0, 59));
   let hours = addZerro(currentDate.getHours());
   let minutes = addZerro(currentDate.getMinutes());
-  const startTime = currentDate.getTime();
+  // const startTime = currentDate.getTime();
   const dayDate = `${MONTHS[currentDate.getMonth()]} ${day}`;
 
   const start = {
@@ -103,7 +83,7 @@ const getDate = () => {
     dayDate,
     start,
     end,
-    duration: transformDuration(currentDate.getTime() - startTime)
+    // duration: transformDuration(currentDate.getTime() - startTime)
   };
 
 };
@@ -134,23 +114,11 @@ const getRoute = () => {
 };
 
 export const getRoutes = () => {
-  const routes = new Array(ROUTE_COUNT).fill().map((item, index) => {
+  return new Array(ROUTE_COUNT).fill().map((item, index) => {
     item = getRoute();
     item.id = `route-${index}`;
     return item;
   });
-
-  routes.sort((a, b) => a.date.start.time > b.date.start.time ? 1 : -1);
-
-  const unicDates = Array.from(new Set(routes.map((item) => item.date.dayDate)));
-
-  const tempArray = [];
-
-  unicDates.forEach((el)=> {
-    tempArray.push(routes.filter((item) => item.date.dayDate === el));
-  });
-
-  return tempArray;
 };
 
 

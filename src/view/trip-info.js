@@ -2,11 +2,10 @@ import AbstractView from './abstract';
 
 const createTotalTemplate = (routes) => {
   let total = 0;
-  routes.forEach((routeOfDay) => {
-    routeOfDay.forEach((route) => {
-      total += parseInt(route.price, 10);
-    });
+  routes.forEach((route) => {
+    total += parseInt(route.price, 10);
   });
+
   return (
     `<p class="trip-info__cost">
       Total: &euro;&nbsp;<span class="trip-info__cost-value">${total}</span>
@@ -29,11 +28,8 @@ const createMainTemplate = (routes) => {
 const createTripInfoTemplate = (routes = []) => {
   return (
     `<section class="trip-main__trip-info trip-info">
-
       ${createMainTemplate(routes)}
-
       ${createTotalTemplate(routes)}
-      
     </section>`
   );
 };

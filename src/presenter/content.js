@@ -7,6 +7,9 @@ import EventItemView from '../view/event-item';
 import EventView from '../view/event';
 import EventEditFormView from '../view/event-edit';
 import NoEventsView from '../view/no-events';
+import SortView from '../view/events-sort';
+import {SortType} from '../const';
+import {distributeEventsByDays, sortByDate, sortByTime, sortByPrice} from '../utils/events';
 import {render, replace, RenderPosition} from '../utils/render';
 
 export default class Content {
@@ -15,38 +18,80 @@ export default class Content {
     this._parentContainer = parentContainer;
     this._contentList = new ContentListView();
     this._noEvents = new NoEventsView();
+    this._sortPanel = new SortView();
+    this._currentSortType = SortType.EVENT;
+    this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
   }
 
-  init(routesByDay) {
-    this._routesByDay = routesByDay.slice();
+  init(routes) {
+    this._originalRoutes = routes.slice();
+    this._routes = routes.slice();
     render(this._parentContainer, this._contentList, RenderPosition.BEFOREEND);
-    this._render(this._routesByDay);
+    this._renderSort();
+    this._sortEvents();
+    this._renderEvents();
   }
 
-  _render(routesByDay) {
-    // отрисует весь список маршрутов
+  _renderSort() {
+    const place = this._parentContainer.querySelector(`h2`);
+    render(place, this._sortPanel, RenderPosition.AFTEREND);
+    this._sortPanel.setSortChangeHandler(this._handleSortTypeChange);
+  }
 
-    if (routesByDay.length === 0) {
+  _handleSortTypeChange(sortType) {
+    this._currentSortType = sortType;
+    this._sortEvents(sortType);
+    this._clearContentList();
+    this._renderEvents();
+  }
+
+  _sortEvents(sortType) {
+    switch (sortType) {
+      case SortType.EVENT:
+        this._routes.sort(sortByDate);
+        break;
+      case SortType.TIME:
+        this._routes.sort(sortByTime);
+        break;
+      case SortType.PRICE:
+        this._routes.sort(sortByPrice);
+        break;
+    }
+  }
+
+  _clearContentList() {
+    this._contentList.getElement().innerHTML = ``;
+  }
+
+  _renderEvents() {
+    // отрисует весь список маршрутов
+    if (this._routes.length === 0) {
       this._renderNoEvent();
       return;
     }
 
-    routesByDay.forEach((oneDayRoute, i) => {
-      const {dayDate} = oneDayRoute[0].date;
-      const contentItem = new ContentItemView();
-      const dayInfo = new DayInfoView(dayDate, i + 1);
-      const eventList = new EventListView();
-
-      render(contentItem, dayInfo, RenderPosition.AFTERBEGIN);
-
-      oneDayRoute.forEach((route) => {
-        this._renderEvent(eventList, route);
+    if (this._currentSortType === SortType.EVENT) {
+      this._routes = distributeEventsByDays(this._routes);
+      this._routes.forEach((oneDayEvents, i) => {
+        const {dayDate} = oneDayEvents[0].date;
+        this._renderContentItem(oneDayEvents, dayDate, i);
       });
+    } else {
+      this._renderContentItem(this._routes);
+    }
+    this._routes = this._originalRoutes.slice();
+  }
 
-
-      render(contentItem, eventList, RenderPosition.BEFOREEND);
-      render(this._contentList, contentItem, RenderPosition.BEFOREEND);
+  _renderContentItem(oneDayEvents, dayDate, dayNumber) {
+    const contentItem = new ContentItemView();
+    const dayInfo = new DayInfoView(dayDate, dayNumber + 1);
+    const eventList = new EventListView();
+    render(contentItem, dayInfo, RenderPosition.AFTERBEGIN);
+    oneDayEvents.forEach((route) => {
+      this._renderEvent(eventList, route);
     });
+    render(contentItem, eventList, RenderPosition.BEFOREEND);
+    render(this._contentList, contentItem, RenderPosition.BEFOREEND);
   }
 
   _renderEvent(parentContainer, route) {

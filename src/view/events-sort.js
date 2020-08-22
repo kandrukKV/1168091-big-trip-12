@@ -1,4 +1,5 @@
 import AbstractView from './abstract';
+import {SortType} from '../const';
 
 const createTripEventsSortTemplate = () => {
   return (
@@ -6,12 +7,12 @@ const createTripEventsSortTemplate = () => {
         <span class="trip-sort__item  trip-sort__item--day">Day</span>
 
         <div class="trip-sort__item  trip-sort__item--event">
-          <input id="sort-event" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-event" checked>
+          <input id="sort-event" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="${SortType.EVENT}" checked>
           <label class="trip-sort__btn" for="sort-event">Event</label>
         </div>
 
         <div class="trip-sort__item  trip-sort__item--time">
-          <input id="sort-time" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-time">
+          <input id="sort-time" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="${SortType.TIME}">
           <label class="trip-sort__btn" for="sort-time">
             Time
             <svg class="trip-sort__direction-icon" width="8" height="10" viewBox="0 0 8 10">
@@ -21,7 +22,7 @@ const createTripEventsSortTemplate = () => {
         </div>
 
         <div class="trip-sort__item  trip-sort__item--price">
-          <input id="sort-price" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-price">
+          <input id="sort-price" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="${SortType.PRICE}">
           <label class="trip-sort__btn" for="sort-price">
             Price
             <svg class="trip-sort__direction-icon" width="8" height="10" viewBox="0 0 8 10">
@@ -36,7 +37,21 @@ const createTripEventsSortTemplate = () => {
 };
 
 export default class SortEventsMenu extends AbstractView {
+  constructor() {
+    super();
+    this._sortChangeHandler = this._sortChangeHandler.bind(this);
+  }
+
   getTemplate() {
     return createTripEventsSortTemplate();
+  }
+  _sortChangeHandler(evt) {
+    evt.preventDefault();
+    this._callback.sortHandler(evt.target.value);
+  }
+
+  setSortChangeHandler(callback) {
+    this._callback.sortHandler = callback;
+    this.getElement().addEventListener(`change`, this._sortChangeHandler);
   }
 }
