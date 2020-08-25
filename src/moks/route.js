@@ -7,19 +7,27 @@ const LOREM_IPSUM = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cr
 const ROUTE_COUNT = 20;
 
 const OFFERS = [
-  {type: `luggage`, name: `Add luggage`, price: `30`, isChecked: true},
-  {type: `comfort`, name: `Switch to comfort class`, price: `100`, isChecked: true},
-  {type: `meal`, name: `Add meal`, price: `15`, isChecked: true},
-  {type: `seats`, name: `Choose seats`, price: `5`, isChecked: true},
-  {type: `train`, name: `Travel by train`, price: `40`, isChecked: true}
+  {name: `Add luggage`, price: `30`, isChecked: Math.random() >= 0.5},
+  {name: `Switch to comfort class`, price: `100`, isChecked: Math.random() >= 0.5},
+  {name: `Add meal`, price: `15`, isChecked: Math.random() >= 0.5},
+  {name: `Choose seats`, price: `5`, isChecked: Math.random() >= 0.5},
+  {name: `Travel by train`, price: `40`, isChecked: Math.random() >= 0.5}
 ];
 
 const MONTHS = [`JAN`, `FEB`, `MAR`, `APR`, `MAY`, `JUN`, `JUL`, `AUG`, `SEP`, `OCT`, `NOV`, `DEC`];
 
-const getOffers = () => {
+const createOffers = () => {
   const offers = shuffleArray(OFFERS);
   const numberOfOffers = getRandomInteger(0, offers.length);
   return offers.slice(0, numberOfOffers);
+};
+
+export const getOffers = () => {
+  const offers = {};
+  ROUTE_TYPES.forEach((type) => {
+    offers[type] = createOffers();
+  });
+  return offers;
 };
 
 const getDescription = () => {
@@ -99,13 +107,16 @@ const getDestination = () => {
   }
 };
 
+const offers = getOffers();
+
 const getRoute = () => {
   const date = getDate();
+  const type = getRandomElementOfArray(ROUTE_TYPES);
 
   return {
-    type: getRandomElementOfArray(ROUTE_TYPES),
+    type,
     city: getRandomElementOfArray(SITIES),
-    offers: getOffers(),
+    offers: offers[type],
     destination: getDestination(),
     isFavorite: Math.random() >= 0.5,
     date,
@@ -116,9 +127,14 @@ const getRoute = () => {
 export const getRoutes = () => {
   return new Array(ROUTE_COUNT).fill().map((item, index) => {
     item = getRoute();
-    item.id = `route-${index}`;
+    item.id = `route${index}`;
     return item;
   });
 };
 
-
+export const getData = () => {
+  return {
+    events: getRoutes(),
+    offers
+  };
+};

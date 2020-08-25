@@ -69,7 +69,9 @@ export default class Event extends AbstractView {
 
   _editClickHandler(evt) {
     evt.preventDefault();
-    this._callback.editClick();
+    if (evt.target.tagName === `BUTTON`) {
+      this._callback.editClick();
+    }
   }
 
   setClickHandler(callback) {

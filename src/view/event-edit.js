@@ -13,7 +13,9 @@ const DEFAULT_ROUTE = {
       date: ``
     }
   },
-  isNewEventMode: true
+  offers: [],
+  isNewEventMode: true,
+  isFavorite: false
 };
 
 const createDestinationTemplate = (destination) => {
@@ -37,12 +39,27 @@ const createDestinationTemplate = (destination) => {
   );
 };
 
+const createOffersTemplate = (offers) => {
+  return offers.map((item, index) => {
+    return (
+      `<div class="event__offer-selector">
+      <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${index}" type="checkbox" name="event-offer-luggage" ${item.isChecked ? `checked` : ``}>
+      <label class="event__offer-label" for="event-offer-luggage-${index}">
+        <span class="event__offer-title">${item.name}</span>
+        &plus;
+        &euro;&nbsp;<span class="event__offer-price">${item.price}</span>
+      </label>
+    </div>`
+    );
+  }).join(``);
+};
+
 const createEventEditFormTemplate = (route = DEFAULT_ROUTE) => {
-  const {type, city, date, price, isNewEventMode} = route;
+  const {type, city, date, price, isNewEventMode, isFavorite} = route;
   let newEventClass = ``;
   let eventEditBlock = `<button class="event__reset-btn" type="reset">Delete</button>
-      <input id="event-favorite-1" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" checked>
-      <label class="event__favorite-btn" for="event-favorite-1">
+      <input id="event-favorite-${route.id}" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${isFavorite ? `checked` : ``}>
+      <label class="event__favorite-btn" for="event-favorite-${route.id}">
         <span class="visually-hidden">Add to favorite</span>
         <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
           <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"/>
@@ -173,52 +190,8 @@ const createEventEditFormTemplate = (route = DEFAULT_ROUTE) => {
       <section class="event__details">
         <section class="event__section  event__section--offers">
           <h3 class="event__section-title  event__section-title--offers">Offers</h3>
-
             <div class="event__available-offers">
-              <div class="event__offer-selector">
-                <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage" checked>
-                <label class="event__offer-label" for="event-offer-luggage-1">
-                  <span class="event__offer-title">Add luggage</span>
-                  &plus;
-                  &euro;&nbsp;<span class="event__offer-price">30</span>
-                </label>
-              </div>
-
-              <div class="event__offer-selector">
-                <input class="event__offer-checkbox  visually-hidden" id="event-offer-comfort-1" type="checkbox" name="event-offer-comfort" checked>
-                <label class="event__offer-label" for="event-offer-comfort-1">
-                  <span class="event__offer-title">Switch to comfort class</span>
-                  &plus;
-                  &euro;&nbsp;<span class="event__offer-price">100</span>
-                </label>
-              </div>
-
-              <div class="event__offer-selector">
-                <input class="event__offer-checkbox  visually-hidden" id="event-offer-meal-1" type="checkbox" name="event-offer-meal">
-                <label class="event__offer-label" for="event-offer-meal-1">
-                  <span class="event__offer-title">Add meal</span>
-                  &plus;
-                  &euro;&nbsp;<span class="event__offer-price">15</span>
-                </label>
-              </div>
-
-              <div class="event__offer-selector">
-                <input class="event__offer-checkbox  visually-hidden" id="event-offer-seats-1" type="checkbox" name="event-offer-seats">
-                <label class="event__offer-label" for="event-offer-seats-1">
-                  <span class="event__offer-title">Choose seats</span>
-                  &plus;
-                  &euro;&nbsp;<span class="event__offer-price">5</span>
-                </label>
-              </div>
-
-              <div class="event__offer-selector">
-                <input class="event__offer-checkbox  visually-hidden" id="event-offer-train-1" type="checkbox" name="event-offer-train">
-                <label class="event__offer-label" for="event-offer-train-1">
-                  <span class="event__offer-title">Travel by train</span>
-                  &plus;
-                  &euro;&nbsp;<span class="event__offer-price">40</span>
-                </label>
-              </div>
+              ${createOffersTemplate(route.offers)}
             </div>
           </section>
         ${destinationTemplate}
@@ -228,19 +201,32 @@ const createEventEditFormTemplate = (route = DEFAULT_ROUTE) => {
 };
 
 export default class EditForm extends AbstractView {
-  constructor(route) {
+  constructor(route, offers) {
     super();
     this._route = route;
+    this._offers = offers;
     this._submitHandler = this._submitHandler.bind(this);
+    this._favoritChangeHandler = this._favoritChangeHandler.bind(this);
   }
 
   getTemplate() {
+    console.log(this);
     return createEventEditFormTemplate(this._route);
   }
 
   _submitHandler(evt) {
     evt.preventDefault();
-    this._callback.submit();
+    this._callback.submit(this._route);
+  }
+
+  _favoritChangeHandler(evt) {
+    evt.preventDefault();
+    this._callback.favoritChange();
+  }
+
+  setFavoritChangeHandler(callback) {
+    this._callback.favoritChange = callback;
+    this.getElement().querySelector(`.event__favorite-checkbox`).addEventListener(`change`, this._favoritChangeHandler);
   }
 
   setSubmitHandler(callback) {
