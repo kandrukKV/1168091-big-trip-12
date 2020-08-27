@@ -113,7 +113,7 @@ export default class Content {
   _handlerEventChange(route) {
     this._events = updateElementOfArray(this._events, route);
     this._originalEvents = updateElementOfArray(this._originalEvents, route);
-    this._eventItemPresenter[route.id].render(route);
+    this._eventItemPresenter[route.id].render(route, this._offers);
   }
 
   _renderEvent(parentContainer, event) {

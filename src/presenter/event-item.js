@@ -25,7 +25,7 @@ export default class EventItem {
     const prevEventEditForm = this._eventEditForm;
 
     this._event = new EventView(route);
-    this._eventEditForm = new EventEditFormView(route, offers);
+    this._eventEditForm = new EventEditFormView(offers, route);
 
     this._event.setClickHandler(this._eventEditClickHandler);
     this._eventEditForm.setSubmitHandler(this._editFormSubmitHandler);

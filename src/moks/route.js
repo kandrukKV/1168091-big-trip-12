@@ -2,7 +2,7 @@ import {getRandomInteger, shuffleArray, getRandomElementOfArray} from '../utils/
 import {addZerro} from '../utils/events';
 
 const ROUTE_TYPES = [`Taxi`, `Bus`, `Train`, `Ship`, `Transport`, `Drive`, `Flight`, `Check-in`, `Sightseeing`, `Restaurant`];
-const SITIES = [`Irkutsk`, `Khabarovsk`, `Tomsk`, `Vladivostok`, `Ekaterinburg`, `Ufa`, `Sratov`];
+const CITIES = [`Irkutsk`, `Khabarovsk`, `Tomsk`, `Vladivostok`, `Ekaterinburg`, `Ufa`, `Sratov`];
 const LOREM_IPSUM = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras aliquet varius magna, non porta ligula feugiat eget. Fusce tristique felis at fermentum pharetra. Aliquam id orci ut lectus varius viverra. Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante. Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum. Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui. Sed sed nisi sed augue convallis suscipit in sed felis. Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus. In rutrum ac purus sit amet tempus.`;
 const ROUTE_COUNT = 20;
 
@@ -22,14 +22,6 @@ const createOffers = () => {
   return offers.slice(0, numberOfOffers);
 };
 
-export const getOffers = () => {
-  const offers = {};
-  ROUTE_TYPES.forEach((type) => {
-    offers[type] = createOffers();
-  });
-  return offers;
-};
-
 const getDescription = () => {
   let arr = LOREM_IPSUM.split(`. `);
   arr = arr.map((item, index) => index === arr.length - 1 ? `${item.trim()}` : `${item.trim()}.`);
@@ -42,6 +34,36 @@ const getPhotos = () => {
     photos.push(`http://picsum.photos/248/152?r=${Math.random()}`);
   }
   return photos;
+};
+
+const getCitesDescription = () => {
+  const citiesDescription = {};
+  CITIES.forEach((city) => {
+    citiesDescription[city] = {
+      offers: createOffers(),
+      destination: {
+        name: getDescription(),
+        photos: getPhotos()
+      }
+    };
+  });
+
+  return citiesDescription;
+};
+
+const citiesDescription = getCitesDescription();
+
+export const getOffers = () => {
+  const offers = {};
+  ROUTE_TYPES.forEach((type) => {
+    offers[type] = {};
+    const cities = shuffleArray(CITIES).slice(2, getRandomInteger(3, CITIES.length));
+    cities.forEach((city) => {
+      offers[type][city] = citiesDescription[city];
+    });
+  });
+
+  return offers;
 };
 
 const getDate = () => {
@@ -91,20 +113,8 @@ const getDate = () => {
     dayDate,
     start,
     end,
-    // duration: transformDuration(currentDate.getTime() - startTime)
   };
 
-};
-
-const getDestination = () => {
-  if (Math.random() >= 0.7) {
-    return null;
-  } else {
-    return {
-      description: getDescription(),
-      photos: getPhotos()
-    };
-  }
 };
 
 const offers = getOffers();
@@ -112,12 +122,14 @@ const offers = getOffers();
 const getRoute = () => {
   const date = getDate();
   const type = getRandomElementOfArray(ROUTE_TYPES);
+  const city = getRandomElementOfArray(Object.keys(offers[type]));
+  const destination = offers[type][city];
 
   return {
     type,
-    city: getRandomElementOfArray(SITIES),
-    offers: offers[type],
-    destination: getDestination(),
+    city,
+    offers: offers[type][city].offers,
+    destination,
     isFavorite: Math.random() >= 0.5,
     date,
     price: getRandomInteger(20, 200),
