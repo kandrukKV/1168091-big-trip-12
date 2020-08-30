@@ -21,11 +21,12 @@ export default class Content {
     this._contentItems = [];
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
     this._handlerEventChange = this._handlerEventChange.bind(this);
+    this._handleModeChange = this._handleModeChange.bind(this);
   }
 
   init(data) {
-    const {events, offers} = data;
-    this._offers = offers;
+    const {events, details} = data;
+    this._details = details;
     this._data = data;
     this._originalEvents = events.slice();
     this._events = events.slice();
@@ -39,6 +40,12 @@ export default class Content {
     const place = this._parentContainer.querySelector(`h2`);
     render(place, this._sortPanel, RenderPosition.AFTEREND);
     this._sortPanel.setSortChangeHandler(this._handleSortTypeChange);
+  }
+
+  _handleModeChange() {
+    Object
+      .values(this._eventItemPresenter)
+      .forEach((presenter) => presenter.resetView());
   }
 
   _handleSortTypeChange(sortType) {
@@ -113,13 +120,13 @@ export default class Content {
   _handlerEventChange(route) {
     this._events = updateElementOfArray(this._events, route);
     this._originalEvents = updateElementOfArray(this._originalEvents, route);
-    this._eventItemPresenter[route.id].render(route, this._offers);
+    this._eventItemPresenter[route.id].render(route, this._details);
   }
 
   _renderEvent(parentContainer, event) {
-    const eventItemPresenter = new EventItemPresenter(parentContainer, this._handlerEventChange);
+    const eventItemPresenter = new EventItemPresenter(parentContainer, this._handlerEventChange, this._handleModeChange);
     this._eventItemPresenter[event.id] = eventItemPresenter;
-    eventItemPresenter.render(event, this._offers);
+    eventItemPresenter.render(event, this._details);
   }
 
   _renderNoEvent() {

@@ -1,6 +1,6 @@
 import AbstractView from './abstract';
 import {getPreposition} from '../utils/common';
-import {transformDuration} from '../utils/events';
+import {transformDuration, upFirstSymbol} from '../utils/events';
 
 const OFFERS_COUNT = 3;
 
@@ -20,7 +20,7 @@ const getOffersTemplate = (offers) => {
 
 const createEventTemplate = (route) => {
 
-  const {type, city, price, destination, date} = route;
+  const {type, price, offers, date, destination} = route;
 
   const duration = transformDuration(parseInt(date.end.time, 10) - parseInt(date.start.time, 10));
   return (
@@ -28,7 +28,7 @@ const createEventTemplate = (route) => {
       <div class="event__type">
         <img class="event__type-icon" width="42" height="42" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
       </div>
-      <h3 class="event__title">${type} ${getPreposition(type)} ${city}</h3>
+      <h3 class="event__title">${upFirstSymbol(type)} ${getPreposition(type)} ${destination.name}</h3>
 
       <div class="event__schedule">
         <p class="event__time">
@@ -45,7 +45,7 @@ const createEventTemplate = (route) => {
 
       <h4 class="visually-hidden">Offers:</h4>
       <ul class="event__selected-offers">
-        ${getOffersTemplate(destination.offers)}
+        ${getOffersTemplate(offers)}
       </ul>
 
       <button class="event__rollup-btn" type="button">

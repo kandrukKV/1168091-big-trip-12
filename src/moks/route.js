@@ -1,17 +1,17 @@
 import {getRandomInteger, shuffleArray, getRandomElementOfArray} from '../utils/common';
 import {addZerro} from '../utils/events';
 
-const ROUTE_TYPES = [`Taxi`, `Bus`, `Train`, `Ship`, `Transport`, `Drive`, `Flight`, `Check-in`, `Sightseeing`, `Restaurant`];
+const ROUTE_TYPES = [`taxi`, `bus`, `train`, `ship`, `transport`, `drive`, `flight`, `check-in`, `sightseeing`, `restaurant`];
 const CITIES = [`Irkutsk`, `Khabarovsk`, `Tomsk`, `Vladivostok`, `Ekaterinburg`, `Ufa`, `Sratov`];
 const LOREM_IPSUM = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras aliquet varius magna, non porta ligula feugiat eget. Fusce tristique felis at fermentum pharetra. Aliquam id orci ut lectus varius viverra. Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante. Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum. Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui. Sed sed nisi sed augue convallis suscipit in sed felis. Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus. In rutrum ac purus sit amet tempus.`;
 const ROUTE_COUNT = 20;
 
 const OFFERS = [
-  {name: `Add luggage`, price: `30`, isChecked: Math.random() >= 0.5},
-  {name: `Switch to comfort class`, price: `100`, isChecked: Math.random() >= 0.5},
-  {name: `Add meal`, price: `15`, isChecked: Math.random() >= 0.5},
-  {name: `Choose seats`, price: `5`, isChecked: Math.random() >= 0.5},
-  {name: `Travel by train`, price: `40`, isChecked: Math.random() >= 0.5}
+  {name: `Add luggage`, price: `30`},
+  {name: `Switch to comfort class`, price: `100`},
+  {name: `Add meal`, price: `15`},
+  {name: `Choose seats`, price: `5`},
+  {name: `Travel by train`, price: `40`}
 ];
 
 const MONTHS = [`JAN`, `FEB`, `MAR`, `APR`, `MAY`, `JUN`, `JUL`, `AUG`, `SEP`, `OCT`, `NOV`, `DEC`];
@@ -36,31 +36,26 @@ const getPhotos = () => {
   return photos;
 };
 
-const getCitesDescription = () => {
-  const citiesDescription = {};
+const getDestinations = () => {
+  const destitations = [];
   CITIES.forEach((city) => {
-    citiesDescription[city] = {
-      offers: createOffers(),
-      destination: {
-        name: getDescription(),
-        photos: getPhotos()
-      }
-    };
+    destitations.push({
+      name: city,
+      title: `${city}, ${getDescription()}`,
+      photos: getPhotos()
+    });
   });
 
-  return citiesDescription;
+  return destitations;
 };
 
-const citiesDescription = getCitesDescription();
-
 export const getOffers = () => {
-  const offers = {};
+  const offers = [];
   ROUTE_TYPES.forEach((type) => {
-    offers[type] = {};
-    const cities = shuffleArray(CITIES).slice(2, getRandomInteger(3, CITIES.length));
-    cities.forEach((city) => {
-      offers[type][city] = citiesDescription[city];
-    });
+    const temp = {};
+    temp.type = type;
+    temp.offers = createOffers();
+    offers.push(temp);
   });
 
   return offers;
@@ -118,18 +113,16 @@ const getDate = () => {
 };
 
 const offers = getOffers();
+const destitations = getDestinations();
 
 const getRoute = () => {
   const date = getDate();
   const type = getRandomElementOfArray(ROUTE_TYPES);
-  const city = getRandomElementOfArray(Object.keys(offers[type]));
-  const destination = offers[type][city];
 
   return {
     type,
-    city,
-    offers: offers[type][city].offers,
-    destination,
+    offers: offers.find((item) => item.type === type).offers,
+    destination: getRandomElementOfArray(destitations),
     isFavorite: Math.random() >= 0.5,
     date,
     price: getRandomInteger(20, 200),
@@ -139,7 +132,7 @@ const getRoute = () => {
 export const getRoutes = () => {
   return new Array(ROUTE_COUNT).fill().map((item, index) => {
     item = getRoute();
-    item.id = `route${index}`;
+    item.id = index;
     return item;
   });
 };
@@ -147,6 +140,9 @@ export const getRoutes = () => {
 export const getData = () => {
   return {
     events: getRoutes(),
-    offers
+    details: {
+      offers,
+      destitations
+    }
   };
 };

@@ -11,8 +11,6 @@ const data = getData();
 
 const {events} = data;
 
-console.log(data);
-
 const siteTripMainElement = document.querySelector(`.trip-main`);
 const siteTripControlsElement = siteTripMainElement.querySelector(`.trip-main__trip-controls`);
 const siteMenuElement = siteTripMainElement.querySelector(`h2`);
