@@ -41,3 +41,7 @@ export const sortByTime = (a, b) => {
 export const sortByPrice = (a, b) => {
   return a.price > b.price ? 1 : -1;
 };
+
+export const upFirstSymbol = (word) => {
+  return word[0].toUpperCase() + word.slice(1);
+};

@@ -1,12 +1,11 @@
 import AbstractView from './abstract';
 import {getPreposition} from '../utils/common';
-import {transformDuration} from '../utils/events';
+import {transformDuration, upFirstSymbol} from '../utils/events';
 
 const OFFERS_COUNT = 3;
 
-const getOffers = (offers) => {
+const getOffersTemplate = (offers) => {
   const offersLength = Math.min(offers.length, OFFERS_COUNT);
-
   return offers.slice(0, offersLength).map((item) => {
     return (
       `<li class="event__offer">
@@ -21,15 +20,15 @@ const getOffers = (offers) => {
 
 const createEventTemplate = (route) => {
 
-  const {type, city, price, offers, date} = route;
-  const duration = transformDuration(parseInt(date.end.time, 10) - parseInt(date.start.time, 10));
+  const {type, price, offers, date, destination} = route;
 
+  const duration = transformDuration(parseInt(date.end.time, 10) - parseInt(date.start.time, 10));
   return (
     `<div class="event">
       <div class="event__type">
         <img class="event__type-icon" width="42" height="42" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
       </div>
-      <h3 class="event__title">${type} ${getPreposition(type)} ${city}</h3>
+      <h3 class="event__title">${upFirstSymbol(type)} ${getPreposition(type)} ${destination.name}</h3>
 
       <div class="event__schedule">
         <p class="event__time">
@@ -46,7 +45,7 @@ const createEventTemplate = (route) => {
 
       <h4 class="visually-hidden">Offers:</h4>
       <ul class="event__selected-offers">
-        ${getOffers(offers)}
+        ${getOffersTemplate(offers)}
       </ul>
 
       <button class="event__rollup-btn" type="button">
@@ -69,7 +68,9 @@ export default class Event extends AbstractView {
 
   _editClickHandler(evt) {
     evt.preventDefault();
-    this._callback.editClick();
+    if (evt.target.tagName === `BUTTON`) {
+      this._callback.editClick();
+    }
   }
 
   setClickHandler(callback) {

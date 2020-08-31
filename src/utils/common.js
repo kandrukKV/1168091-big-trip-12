@@ -31,3 +31,17 @@ export const getRandomElementOfArray = (arr) => {
   return arr[randomIndex];
 };
 
+export const updateElementOfArray = (arr, newElement) => {
+  const index = arr.findIndex((item) => item.id === newElement.id);
+
+  if (index === -1) {
+    return arr;
+  }
+
+  return [
+    ...arr.slice(0, index),
+    newElement,
+    ...arr.slice(index + 1)
+  ];
+};
+

@@ -1,22 +1,22 @@
 import {getRandomInteger, shuffleArray, getRandomElementOfArray} from '../utils/common';
 import {addZerro} from '../utils/events';
 
-const ROUTE_TYPES = [`Taxi`, `Bus`, `Train`, `Ship`, `Transport`, `Drive`, `Flight`, `Check-in`, `Sightseeing`, `Restaurant`];
-const SITIES = [`Irkutsk`, `Khabarovsk`, `Tomsk`, `Vladivostok`, `Ekaterinburg`, `Ufa`, `Sratov`];
+const ROUTE_TYPES = [`taxi`, `bus`, `train`, `ship`, `transport`, `drive`, `flight`, `check-in`, `sightseeing`, `restaurant`];
+const CITIES = [`Irkutsk`, `Khabarovsk`, `Tomsk`, `Vladivostok`, `Ekaterinburg`, `Ufa`, `Sratov`];
 const LOREM_IPSUM = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras aliquet varius magna, non porta ligula feugiat eget. Fusce tristique felis at fermentum pharetra. Aliquam id orci ut lectus varius viverra. Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante. Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum. Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui. Sed sed nisi sed augue convallis suscipit in sed felis. Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus. In rutrum ac purus sit amet tempus.`;
 const ROUTE_COUNT = 20;
 
 const OFFERS = [
-  {type: `luggage`, name: `Add luggage`, price: `30`, isChecked: true},
-  {type: `comfort`, name: `Switch to comfort class`, price: `100`, isChecked: true},
-  {type: `meal`, name: `Add meal`, price: `15`, isChecked: true},
-  {type: `seats`, name: `Choose seats`, price: `5`, isChecked: true},
-  {type: `train`, name: `Travel by train`, price: `40`, isChecked: true}
+  {name: `Add luggage`, price: `30`},
+  {name: `Switch to comfort class`, price: `100`},
+  {name: `Add meal`, price: `15`},
+  {name: `Choose seats`, price: `5`},
+  {name: `Travel by train`, price: `40`}
 ];
 
 const MONTHS = [`JAN`, `FEB`, `MAR`, `APR`, `MAY`, `JUN`, `JUL`, `AUG`, `SEP`, `OCT`, `NOV`, `DEC`];
 
-const getOffers = () => {
+const createOffers = () => {
   const offers = shuffleArray(OFFERS);
   const numberOfOffers = getRandomInteger(0, offers.length);
   return offers.slice(0, numberOfOffers);
@@ -34,6 +34,31 @@ const getPhotos = () => {
     photos.push(`http://picsum.photos/248/152?r=${Math.random()}`);
   }
   return photos;
+};
+
+const getDestinations = () => {
+  const destitations = [];
+  CITIES.forEach((city) => {
+    destitations.push({
+      name: city,
+      title: `${city}, ${getDescription()}`,
+      photos: getPhotos()
+    });
+  });
+
+  return destitations;
+};
+
+export const getOffers = () => {
+  const offers = [];
+  ROUTE_TYPES.forEach((type) => {
+    const temp = {};
+    temp.type = type;
+    temp.offers = createOffers();
+    offers.push(temp);
+  });
+
+  return offers;
 };
 
 const getDate = () => {
@@ -83,30 +108,21 @@ const getDate = () => {
     dayDate,
     start,
     end,
-    // duration: transformDuration(currentDate.getTime() - startTime)
   };
 
 };
 
-const getDestination = () => {
-  if (Math.random() >= 0.7) {
-    return null;
-  } else {
-    return {
-      description: getDescription(),
-      photos: getPhotos()
-    };
-  }
-};
+const offers = getOffers();
+const destitations = getDestinations();
 
 const getRoute = () => {
   const date = getDate();
+  const type = getRandomElementOfArray(ROUTE_TYPES);
 
   return {
-    type: getRandomElementOfArray(ROUTE_TYPES),
-    city: getRandomElementOfArray(SITIES),
-    offers: getOffers(),
-    destination: getDestination(),
+    type,
+    offers: offers.find((item) => item.type === type).offers,
+    destination: getRandomElementOfArray(destitations),
     isFavorite: Math.random() >= 0.5,
     date,
     price: getRandomInteger(20, 200),
@@ -116,9 +132,17 @@ const getRoute = () => {
 export const getRoutes = () => {
   return new Array(ROUTE_COUNT).fill().map((item, index) => {
     item = getRoute();
-    item.id = `route-${index}`;
+    item.id = index;
     return item;
   });
 };
 
-
+export const getData = () => {
+  return {
+    events: getRoutes(),
+    details: {
+      offers,
+      destitations
+    }
+  };
+};

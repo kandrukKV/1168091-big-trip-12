@@ -1,8 +1,13 @@
-import AbstractView from './abstract';
+import SmartView from './smart';
 import {getPreposition} from '../utils/common';
+import {upFirstSymbol} from '../utils/events';
+
+const FAVORITE_INPUT_NAME = `event-favorite`;
+const NEW_EVENT_CLASS = `trip-events__item `;
 
 const DEFAULT_ROUTE = {
-  type: `Taxi`,
+  id: null,
+  type: `flight`,
   city: ``,
   price: ``,
   date: {
@@ -13,7 +18,8 @@ const DEFAULT_ROUTE = {
       date: ``
     }
   },
-  isNewEventMode: true
+  offers: [],
+  isFavorite: false
 };
 
 const createDestinationTemplate = (destination) => {
@@ -26,7 +32,7 @@ const createDestinationTemplate = (destination) => {
   return (
     `<section class="event__section  event__section--destination">
       <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-      <p class="event__destination-description">${destination.description}</p>
+      <p class="event__destination-description">${destination.title}</p>
 
       <div class="event__photos-container">
         <div class="event__photos-tape">
@@ -37,12 +43,49 @@ const createDestinationTemplate = (destination) => {
   );
 };
 
-const createEventEditFormTemplate = (route = DEFAULT_ROUTE) => {
-  const {type, city, date, price, isNewEventMode} = route;
-  let newEventClass = ``;
-  let eventEditBlock = `<button class="event__reset-btn" type="reset">Delete</button>
-      <input id="event-favorite-1" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" checked>
-      <label class="event__favorite-btn" for="event-favorite-1">
+const createOffersTemplate = (offers, isChecked) => {
+
+  if (offers.length === 0) {
+    return ``;
+  }
+
+  const innerTemplate = offers.map((item, index) => {
+    return (
+      `<div class="event__offer-selector">
+        <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${index}" type="checkbox" name="event-offer-luggage" ${isChecked ? `checked` : ``}>
+        <label class="event__offer-label" for="event-offer-luggage-${index}">
+          <span class="event__offer-title">${item.name}</span>
+          &plus;
+          &euro;&nbsp;<span class="event__offer-price">${item.price}</span>
+        </label>
+      </div>`
+    );
+  }).join(``);
+
+  return (
+    `<section class="event__section  event__section--offers">
+      <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+      <div class="event__available-offers">
+        ${innerTemplate}
+      </div>
+    </section>`
+  );
+};
+
+const createCitiesTemplate = (cities) => {
+  return cities.map((city) => {
+    return (
+      `<option value="${city}"></option>`
+    );
+  }).join(``);
+};
+
+const createEditButtonsBlockTemplate = (eventId, isFavorite, isEditMode) => {
+  if (isEditMode) {
+    return (
+      `<button class="event__reset-btn" type="reset">Delete</button>
+      <input id="event-favorite-${eventId}" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${isFavorite ? `checked` : ``}>
+      <label class="event__favorite-btn" for="event-favorite-${eventId}">
         <span class="visually-hidden">Add to favorite</span>
         <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
           <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"/>
@@ -50,26 +93,31 @@ const createEventEditFormTemplate = (route = DEFAULT_ROUTE) => {
       </label>
       <button class="event__rollup-btn" type="button">
         <span class="visually-hidden">Open event</span>
-      </button>`;
-
-  if (isNewEventMode) {
-    newEventClass = `trip-events__item `;
-    eventEditBlock = `<button class="event__reset-btn" type="reset">Cancel</button>`;
+      </button>`
+    );
+  } else {
+    return `<button class="event__reset-btn" type="reset">Cancel</button>`;
   }
+};
 
-  const destination = null;
+const createEventEditFormTemplate = (details, route = DEFAULT_ROUTE, isEditMode) => {
+  const {id, type, date, price, isFavorite, destination, offers, isOffersChecked, isDestination} = route;
+  const cities = details.destitations.map((item) => item.name);
+  const currentCity = destination.name;
+  const newEventClass = isEditMode ? `` : NEW_EVENT_CLASS;
+  const eventEditBlock = createEditButtonsBlockTemplate(id, isFavorite, isEditMode);
 
-  const destinationTemplate = createDestinationTemplate(destination);
+  const destinationTemplate = isDestination ? createDestinationTemplate(destination) : ``;
 
   return (
-    `<form class="${newEventClass}event  event--edit" action="#" method="post">
+    `<form class="${newEventClass}event event--edit" action="#" method="post">
       <header class="event__header">
         <div class="event__type-wrapper">
-          <label class="event__type  event__type-btn" for="event-type-toggle-1">
+          <label class="event__type  event__type-btn" for="event-type-toggle-${id}">
             <span class="visually-hidden">Choose event type</span>
-            <img class="event__type-icon" width="17" height="17" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
+            <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
           </label>
-          <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
+          <input class="event__type-toggle  visually-hidden" id="event-type-toggle-${id}" type="checkbox">
 
           <div class="event__type-list">
             <fieldset class="event__type-group">
@@ -106,7 +154,7 @@ const createEventEditFormTemplate = (route = DEFAULT_ROUTE) => {
               </div>
 
               <div class="event__type-item">
-                <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight" checked>
+                <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight">
                 <label class="event__type-label  event__type-label--flight" for="event-type-flight-1">Flight</label>
               </div>
             </fieldset>
@@ -133,118 +181,165 @@ const createEventEditFormTemplate = (route = DEFAULT_ROUTE) => {
         </div>
 
         <div class="event__field-group  event__field-group--destination">
-          <label class="event__label  event__type-output" for="event-destination-1">
-            ${type} ${getPreposition(type)}
-          </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${city}" list="destination-list-1">
-          <datalist id="destination-list-1">
-            <option value="Amsterdam"></option>
-            <option value="Geneva"></option>
-            <option value="Chamonix"></option>
-            <option value="Saint Petersburg"></option>
+          <label class="event__label  event__type-output" for="event-destination-${id}">${upFirstSymbol(type)} ${getPreposition(type)}</label>
+          <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${currentCity}" list="destination-list-${id}">
+          <datalist id="destination-list-${id}">
+            ${createCitiesTemplate(cities)}
           </datalist>
         </div>
 
         <div class="event__field-group  event__field-group--time">
-          <label class="visually-hidden" for="event-start-time-1">
+          <label class="visually-hidden" for="event-start-time-${id}">
             From
           </label>
-          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${date.start.date}">
+          <input class="event__input  event__input--time" id="event-start-time-${id}" type="text" name="event-start-time" value="${date.start.date}">
           &mdash;
-          <label class="visually-hidden" for="event-end-time-1">
+          <label class="visually-hidden" for="event-end-time-${id}">
             To
           </label>
-          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${date.end.date}">
+          <input class="event__input  event__input--time" id="event-end-time-${id}" type="text" name="event-end-time" value="${date.end.date}">
         </div>
 
         <div class="event__field-group  event__field-group--price">
-          <label class="event__label" for="event-price-1">
+          <label class="event__label" for="event-price-${id}">
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
+          <input class="event__input  event__input--price" id="event-price-${id}" type="text" name="event-price" value="${price}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-
         ${eventEditBlock}
-
-    </header>
+      </header>
       <section class="event__details">
-        <section class="event__section  event__section--offers">
-          <h3 class="event__section-title  event__section-title--offers">Offers</h3>
-
-            <div class="event__available-offers">
-              <div class="event__offer-selector">
-                <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-1" type="checkbox" name="event-offer-luggage" checked>
-                <label class="event__offer-label" for="event-offer-luggage-1">
-                  <span class="event__offer-title">Add luggage</span>
-                  &plus;
-                  &euro;&nbsp;<span class="event__offer-price">30</span>
-                </label>
-              </div>
-
-              <div class="event__offer-selector">
-                <input class="event__offer-checkbox  visually-hidden" id="event-offer-comfort-1" type="checkbox" name="event-offer-comfort" checked>
-                <label class="event__offer-label" for="event-offer-comfort-1">
-                  <span class="event__offer-title">Switch to comfort class</span>
-                  &plus;
-                  &euro;&nbsp;<span class="event__offer-price">100</span>
-                </label>
-              </div>
-
-              <div class="event__offer-selector">
-                <input class="event__offer-checkbox  visually-hidden" id="event-offer-meal-1" type="checkbox" name="event-offer-meal">
-                <label class="event__offer-label" for="event-offer-meal-1">
-                  <span class="event__offer-title">Add meal</span>
-                  &plus;
-                  &euro;&nbsp;<span class="event__offer-price">15</span>
-                </label>
-              </div>
-
-              <div class="event__offer-selector">
-                <input class="event__offer-checkbox  visually-hidden" id="event-offer-seats-1" type="checkbox" name="event-offer-seats">
-                <label class="event__offer-label" for="event-offer-seats-1">
-                  <span class="event__offer-title">Choose seats</span>
-                  &plus;
-                  &euro;&nbsp;<span class="event__offer-price">5</span>
-                </label>
-              </div>
-
-              <div class="event__offer-selector">
-                <input class="event__offer-checkbox  visually-hidden" id="event-offer-train-1" type="checkbox" name="event-offer-train">
-                <label class="event__offer-label" for="event-offer-train-1">
-                  <span class="event__offer-title">Travel by train</span>
-                  &plus;
-                  &euro;&nbsp;<span class="event__offer-price">40</span>
-                </label>
-              </div>
-            </div>
-          </section>
+        ${createOffersTemplate(offers, isOffersChecked)}
         ${destinationTemplate}
       </section>
     </form>`
   );
 };
 
-export default class EditForm extends AbstractView {
-  constructor(route) {
+export default class EditForm extends SmartView {
+  constructor(details, event, isEditMode = true) {
     super();
-    this._route = route;
+    this._event = event;
+    this._data = EditForm.parseEventToData(event);
+    this._details = details;
+    this._isEditMode = isEditMode;
     this._submitHandler = this._submitHandler.bind(this);
+    this._favoritChangeHandler = this._favoritChangeHandler.bind(this);
+    this._typeChangeHandler = this._typeChangeHandler.bind(this);
+    this._cityChangeHandler = this._cityChangeHandler.bind(this);
+    this._priceInputHandler = this._priceInputHandler.bind(this);
+    this._arrowUpHandler = this._arrowUpHandler.bind(this);
+    this._offersChangeHandler = this._offersChangeHandler.bind(this);
+
+    this._setInnerHandlers();
   }
 
   getTemplate() {
-    return createEventEditFormTemplate(this._route);
+    return createEventEditFormTemplate(this._details, this._data, this._isEditMode);
   }
 
   _submitHandler(evt) {
     evt.preventDefault();
-    this._callback.submit();
+    this._callback.submit(EditForm.parseDataToEvent(this._data));
+  }
+
+  _favoritChangeHandler(evt) {
+    evt.preventDefault();
+    if (evt.target.name === FAVORITE_INPUT_NAME) {
+      this._callback.favoritChange();
+    }
+  }
+
+  _arrowUpHandler() {
+    this._callback.arrowUp();
+  }
+
+  _priceInputHandler(evt) {
+    evt.preventDefault();
+    this.updateData({
+      price: evt.target.value,
+    }, true);
+  }
+
+  _typeChangeHandler(evt) {
+    if (evt.target.name === `event-type`) {
+      let type = evt.target.value;
+      this.updateData({
+        type,
+        price: ``,
+        destination: {name: ``},
+        offers: this._details.offers.find((item) => item.type === type).offers,
+        isDestination: false,
+        isOffersChecked: false
+      });
+    }
+  }
+
+  _cityChangeHandler(evt) {
+    this.updateData({
+      destination: this._details.destitations.find((item) => item.name === evt.target.value),
+      offers: this._details.offers.find((item) => item.type === this._data.type).offers,
+      isOffersChecked: false,
+      isDestination: true
+    });
+  }
+
+  _offersChangeHandler() {
+    // console.log(evt.target);
+  }
+
+  reset(event) {
+    this.updateData(
+        EditForm.parseEventToData(event)
+    );
+  }
+
+  setFavoritChangeHandler(callback) {
+    this._callback.favoritChange = callback;
+    this.getElement().addEventListener(`change`, this._favoritChangeHandler);
   }
 
   setSubmitHandler(callback) {
     this._callback.submit = callback;
     this.getElement().addEventListener(`submit`, this._submitHandler);
+  }
+
+  setArrowUpClickHandler(callback) {
+    this._callback.arrowUp = callback;
+    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._arrowUpHandler);
+  }
+
+  _setInnerHandlers() {
+    this.getElement().querySelector(`.event__type-list`).addEventListener(`change`, this._typeChangeHandler);
+    this.getElement().querySelector(`.event__input--destination`).addEventListener(`change`, this._cityChangeHandler);
+    this.getElement().querySelector(`input[name="event-price"]`).addEventListener(`input`, this._priceInputHandler);
+    this.getElement().querySelector(`.event__details`).addEventListener(`change`, this._offersChangeHandler);
+  }
+
+  restoreHandlers() {
+    this._setInnerHandlers();
+    this.setSubmitHandler(this._callback.submit);
+    this.setFavoritChangeHandler(this._callback.favoritChange);
+  }
+
+  static parseDataToEvent(data) {
+    data = Object.assign({}, data);
+    delete data.isOffersChecked;
+    delete data.isDestination;
+    return data;
+  }
+
+  static parseEventToData(event) {
+    return Object.assign(
+        {},
+        event,
+        {
+          isOffersChecked: true,
+          isDestination: false
+        }
+    );
   }
 }
