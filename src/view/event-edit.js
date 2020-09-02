@@ -1,6 +1,10 @@
 import SmartView from './smart';
 import {getPreposition} from '../utils/common';
-import {upFirstSymbol} from '../utils/events';
+import {upFirstSymbol, getFullDate} from '../utils/events';
+
+import flatpickr from 'flatpickr';
+import '../../node_modules/flatpickr/dist/flatpickr.min.css';
+import '../../node_modules/flatpickr/dist/themes/material_blue.css';
 
 const FAVORITE_INPUT_NAME = `event-favorite`;
 const NEW_EVENT_CLASS = `trip-events__item `;
@@ -101,11 +105,15 @@ const createEditButtonsBlockTemplate = (eventId, isFavorite, isEditMode) => {
 };
 
 const createEventEditFormTemplate = (details, route = DEFAULT_ROUTE, isEditMode) => {
-  const {id, type, date, price, isFavorite, destination, offers, isOffersChecked, isDestination} = route;
+  const {id, type, beginDate, endDate, price, isFavorite, destination, offers, isOffersChecked, isDestination} = route;
   const cities = details.destitations.map((item) => item.name);
   const currentCity = destination.name;
   const newEventClass = isEditMode ? `` : NEW_EVENT_CLASS;
   const eventEditBlock = createEditButtonsBlockTemplate(id, isFavorite, isEditMode);
+
+
+  const dateFrom = getFullDate(beginDate);
+  const dateTo = getFullDate(endDate);
 
   const destinationTemplate = isDestination ? createDestinationTemplate(destination) : ``;
 
@@ -192,12 +200,12 @@ const createEventEditFormTemplate = (details, route = DEFAULT_ROUTE, isEditMode)
           <label class="visually-hidden" for="event-start-time-${id}">
             From
           </label>
-          <input class="event__input  event__input--time" id="event-start-time-${id}" type="text" name="event-start-time" value="${date.start.date}">
+          <input class="event__input  event__input--time" id="event-start-time-${id}" type="text" name="event-start-time" value="${dateFrom}">
           &mdash;
           <label class="visually-hidden" for="event-end-time-${id}">
             To
           </label>
-          <input class="event__input  event__input--time" id="event-end-time-${id}" type="text" name="event-end-time" value="${date.end.date}">
+          <input class="event__input  event__input--time" id="event-end-time-${id}" type="text" name="event-end-time" value="${dateTo}">
         </div>
 
         <div class="event__field-group  event__field-group--price">
@@ -224,6 +232,10 @@ export default class EditForm extends SmartView {
     super();
     this._event = event;
     this._data = EditForm.parseEventToData(event);
+
+    this._startDatepicker = null;
+    this._endDatepicker = null;
+
     this._details = details;
     this._isEditMode = isEditMode;
     this._submitHandler = this._submitHandler.bind(this);
@@ -233,12 +245,53 @@ export default class EditForm extends SmartView {
     this._priceInputHandler = this._priceInputHandler.bind(this);
     this._arrowUpHandler = this._arrowUpHandler.bind(this);
     this._offersChangeHandler = this._offersChangeHandler.bind(this);
+    this._startDateChangeHandler = this._startDateChangeHandler.bind(this);
+    this._endDateChangeHandler = this._endDateChangeHandler.bind(this);
 
     this._setInnerHandlers();
+    this._setStartDatepicker();
+    this._setEndDatepicker();
   }
 
   getTemplate() {
     return createEventEditFormTemplate(this._details, this._data, this._isEditMode);
+  }
+
+  _setStartDatepicker() {
+    this._startDatepicker = flatpickr(
+        this.getElement().querySelector(`input[name="event-start-time"]`),
+        {
+          enableTime: true,
+          dateFormat: `y/m/d H:i`,
+          defaultDate: this._data.beginDate,
+          onChange: this._startDateChangeHandler
+        }
+    );
+  }
+
+  _setEndDatepicker() {
+    this._endDatepicker = flatpickr(
+        this.getElement().querySelector(`input[name="event-end-time"]`),
+        {
+          enableTime: true,
+          dateFormat: `y/m/d H:i`,
+          defaultDate: this._data.endDate,
+          minDate: this._data.beginDate,
+          onChange: this._endDateChangeHandler
+        }
+    );
+  }
+
+  _startDateChangeHandler([startDate]) {
+    this.updateData({
+      beginDate: startDate.toISOString()
+    }, true);
+  }
+
+  _endDateChangeHandler([endDate]) {
+    this.updateData({
+      endDate: endDate.toISOString()
+    }, true);
   }
 
   _submitHandler(evt) {
@@ -323,6 +376,9 @@ export default class EditForm extends SmartView {
     this._setInnerHandlers();
     this.setSubmitHandler(this._callback.submit);
     this.setFavoritChangeHandler(this._callback.favoritChange);
+    this.setArrowUpClickHandler(this._callback.arrowUp);
+    this._setStartDatepicker();
+    this._setEndDatepicker();
   }
 
   static parseDataToEvent(data) {

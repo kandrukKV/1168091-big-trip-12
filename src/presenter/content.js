@@ -6,8 +6,8 @@ import NoEventsView from '../view/no-events';
 import SortView from '../view/events-sort';
 import EventItemPresenter from '../presenter/event-item';
 import {SortType} from '../const';
-import {distributeEventsByDays, sortByDate, sortByTime, sortByPrice} from '../utils/events';
-import {render, RenderPosition} from '../utils/render';
+import {distributeEventsByDays, sortByDate, sortByTime, sortByPrice, getDateDay} from '../utils/events';
+import {render, RenderPosition, remove} from '../utils/render';
 import {updateElementOfArray} from '../utils/common';
 
 export default class Content {
@@ -77,8 +77,7 @@ export default class Content {
     this._eventItemPresenter = {};
 
     this._contentItems.forEach((item) => {
-      item.getElement().remove();
-      item.removeElement();
+      remove(item);
     });
 
     this._contentItems = [];
@@ -94,7 +93,7 @@ export default class Content {
     if (this._currentSortType === SortType.EVENT) {
       this._events = distributeEventsByDays(this._events);
       this._events.forEach((oneDayEvents, i) => {
-        const {dayDate} = oneDayEvents[0].date;
+        const dayDate = getDateDay(oneDayEvents[0].startTime);
         this._renderContentItem(oneDayEvents, dayDate, i);
       });
     } else {

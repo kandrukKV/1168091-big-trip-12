@@ -1,40 +1,52 @@
-export const distributeEventsByDays = (events) => {
-  const tempArray = [];
-  const unicDates = Array.from(new Set(events.map((item) => item.date.dayDate)));
-  unicDates.forEach((el)=> {
-    tempArray.push(events.filter((item) => item.date.dayDate === el));
-  });
-  return tempArray;
+import moment from 'moment';
+
+const MONTHS = [`JAN`, `FEB`, `MAR`, `APR`, `MAY`, `JUN`, `JUL`, `AUG`, `SEP`, `OCT`, `NOV`, `DEC`];
+
+export const getDuration = (beginDate, endDate) => {
+  const diff = moment(endDate).diff(moment(beginDate));
+  const duration = moment.duration(diff);
+  const day = duration.days() ? `${addZerro(duration.days())}D ` : ``;
+  const hours = `${addZerro(duration.hours())}H `;
+  const minutes = `${addZerro(duration.minutes())}M`;
+  return `${day}${hours}${minutes}`;
 };
 
-export const transformDuration = (time) => {
-  const minutes = Math.floor((time / 1000 / 60) % 60);
-  const hours = Math.floor((time / (1000 * 60 * 60)) % 24);
-  const days = Math.floor((time / (1000 * 60 * 60 * 24)));
-  let duration = ``;
+export const getFullDate = (date) => {
+  return moment(date).format(`YY/MM/DD HH:mm`);
+};
 
-  if (days) {
-    duration += `${addZerro(days)}D `;
-  }
-  if (hours) {
-    duration += `${addZerro(hours)}H `;
-  }
-  if (minutes) {
-    duration += `${addZerro(minutes)}M`;
-  }
+export const getDateForForm = (date) => {
+  return moment(date).format();
+};
 
-  return duration;
+export const getTime = (date) => {
+  return moment(date).format(`HH:mm`);
+};
+
+
+export const getDateDay = (dateTime) => {
+  const date = new Date(dateTime);
+  return `${MONTHS[date.getMonth()]} ${addZerro(date.getDate())}`;
+};
+
+export const distributeEventsByDays = (events) => {
+  const tempArray = [];
+  const unicDates = Array.from(new Set(events.map((item) => getDateDay(item.startTime))));
+  unicDates.forEach((el)=> {
+    tempArray.push(events.filter((item) => getDateDay(item.startTime) === el));
+  });
+  return tempArray;
 };
 
 export const addZerro = (num) => num <= 9 ? `0` + num : num;
 
 export const sortByDate = (a, b) => {
-  return a.date.start.time > b.date.start.time ? 1 : -1;
+  return a.startTime > b.startTime ? 1 : -1;
 };
 
 export const sortByTime = (a, b) => {
-  const durationA = parseInt(a.date.end.time, 10) - parseInt(a.date.start.time, 10);
-  const durationB = parseInt(b.date.end.time, 10) - parseInt(b.date.start.time, 10);
+  const durationA = parseInt(a.endTime, 10) - parseInt(a.startTime, 10);
+  const durationB = parseInt(b.endTime, 10) - parseInt(b.startTime, 10);
   return durationA > durationB ? 1 : -1;
 };
 
