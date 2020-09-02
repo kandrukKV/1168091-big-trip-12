@@ -1,6 +1,6 @@
 import AbstractView from './abstract';
 import {getPreposition} from '../utils/common';
-import {transformDuration, upFirstSymbol} from '../utils/events';
+import {getDuration, upFirstSymbol, getTime, getDateForForm} from '../utils/events';
 
 const OFFERS_COUNT = 3;
 
@@ -20,9 +20,11 @@ const getOffersTemplate = (offers) => {
 
 const createEventTemplate = (route) => {
 
-  const {type, price, offers, date, destination} = route;
+  const {type, price, offers, destination, beginDate, endDate} = route;
 
-  const duration = transformDuration(parseInt(date.end.time, 10) - parseInt(date.start.time, 10));
+  // const duration = transformDuration(parseInt(endTime, 10) - parseInt(startTime, 10));
+  const duration = getDuration(beginDate, endDate);
+
   return (
     `<div class="event">
       <div class="event__type">
@@ -32,9 +34,9 @@ const createEventTemplate = (route) => {
 
       <div class="event__schedule">
         <p class="event__time">
-          <time class="event__start-time" datetime="2019-03-18T10:30">${date.start.hours}:${date.start.minutes}</time>
+          <time class="event__start-time" datetime="${getDateForForm(beginDate)}">${getTime(beginDate)}</time>
           &mdash;
-          <time class="event__end-time" datetime="2019-03-18T11:00">${date.end.hours}:${date.end.minutes}</time>
+          <time class="event__end-time" datetime="${getDateForForm(endDate)}">${getTime(endDate)}</time>
         </p>
         <p class="event__duration">${duration}</p>
       </div>

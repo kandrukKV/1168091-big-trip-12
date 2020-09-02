@@ -14,8 +14,6 @@ const OFFERS = [
   {name: `Travel by train`, price: `40`}
 ];
 
-const MONTHS = [`JAN`, `FEB`, `MAR`, `APR`, `MAY`, `JUN`, `JUL`, `AUG`, `SEP`, `OCT`, `NOV`, `DEC`];
-
 const createOffers = () => {
   const offers = shuffleArray(OFFERS);
   const numberOfOffers = getRandomInteger(0, offers.length);
@@ -64,8 +62,6 @@ export const getOffers = () => {
 const getDate = () => {
   const currentDate = new Date();
 
-  const year = currentDate.getFullYear().toString().substr(-2);
-
   let day = currentDate.getDate();
 
   if (Math.random() > 0.5) {
@@ -74,40 +70,23 @@ const getDate = () => {
   }
 
   day = addZerro(currentDate.getDate());
-  const month = addZerro(currentDate.getMonth() + 1);
+
   currentDate.setHours(getRandomInteger(0, 23), getRandomInteger(0, 59));
-  let hours = addZerro(currentDate.getHours());
-  let minutes = addZerro(currentDate.getMinutes());
-  // const startTime = currentDate.getTime();
-  const dayDate = `${MONTHS[currentDate.getMonth()]} ${day}`;
 
-  const start = {
-    year,
-    day,
-    month,
-    hours,
-    minutes,
-    date: `${year}/${month}/${day} ${hours}:${minutes}`,
-    time: currentDate.getTime()
-  };
+  const startTime = currentDate.getTime();
+  const beginDate = currentDate.toISOString();
 
-  day = addZerro(currentDate.getDate(currentDate.setDate(currentDate.getDate() + getRandomInteger(0, 1))));
-  minutes = addZerro(currentDate.getMinutes(currentDate.setMinutes(currentDate.getMinutes() + getRandomInteger(30, 120))));
-  hours = addZerro(currentDate.getHours());
+  currentDate.setHours(currentDate.getHours() + getRandomInteger(1, 24));
+  currentDate.setMinutes(currentDate.getMinutes() + getRandomInteger(5, 59));
 
-  const end = {
-    year,
-    day,
-    hours,
-    minutes,
-    date: `${year}/${month}/${day} ${hours}:${minutes}`,
-    time: currentDate.getTime()
-  };
+  const endTime = currentDate.getTime();
+  const endDate = currentDate.toISOString();
 
   return {
-    dayDate,
-    start,
-    end,
+    beginDate,
+    endDate,
+    startTime,
+    endTime,
   };
 
 };
@@ -124,7 +103,10 @@ const getRoute = () => {
     offers: offers.find((item) => item.type === type).offers,
     destination: getRandomElementOfArray(destitations),
     isFavorite: Math.random() >= 0.5,
-    date,
+    startTime: date.startTime,
+    beginDate: date.beginDate,
+    endDate: date.endDate,
+    endTime: date.endTime,
     price: getRandomInteger(20, 200),
   };
 };
