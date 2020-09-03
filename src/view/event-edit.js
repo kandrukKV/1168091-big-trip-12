@@ -106,7 +106,7 @@ const createEditButtonsBlockTemplate = (eventId, isFavorite, isEditMode) => {
 
 const createEventEditFormTemplate = (details, route = DEFAULT_ROUTE, isEditMode) => {
   const {id, type, beginDate, endDate, price, isFavorite, destination, offers, isOffersChecked, isDestination} = route;
-  const cities = details.destitations.map((item) => item.name);
+  const cities = details.destinations.map((item) => item.name);
   const currentCity = destination.name;
   const newEventClass = isEditMode ? `` : NEW_EVENT_CLASS;
   const eventEditBlock = createEditButtonsBlockTemplate(id, isFavorite, isEditMode);
@@ -333,7 +333,7 @@ export default class EditForm extends SmartView {
 
   _cityChangeHandler(evt) {
     this.updateData({
-      destination: this._details.destitations.find((item) => item.name === evt.target.value),
+      destination: this._details.destinations.find((item) => item.name === evt.target.value),
       offers: this._details.offers.find((item) => item.type === this._data.type).offers,
       isOffersChecked: false,
       isDestination: true

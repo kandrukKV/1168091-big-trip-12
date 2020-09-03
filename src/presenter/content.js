@@ -11,8 +11,11 @@ import {render, RenderPosition, remove} from '../utils/render';
 import {updateElementOfArray} from '../utils/common';
 
 export default class Content {
-  constructor(parentContainer) {
+  constructor(parentContainer, eventsModel, offersModel, destinationsModel) {
     this._parentContainer = parentContainer;
+    this._eventsModel = eventsModel;
+    this._offersModel = offersModel;
+    this._destinationsModel = destinationsModel;
     this._contentList = new ContentListView();
     this._noEvents = new NoEventsView();
     this._sortPanel = new SortView();
@@ -27,13 +30,16 @@ export default class Content {
   init(data) {
     const {events, details} = data;
     this._details = details;
-    this._data = data;
     this._originalEvents = events.slice();
     this._events = events.slice();
     render(this._parentContainer, this._contentList, RenderPosition.BEFOREEND);
     this._renderSort();
     this._sortEvents(this._currentSortType);
     this._renderEvents();
+  }
+
+  _getEvents() {
+    return this._eventsModel.getEvents();
   }
 
   _renderSort() {

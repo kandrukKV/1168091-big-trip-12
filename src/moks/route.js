@@ -92,7 +92,7 @@ const getDate = () => {
 };
 
 const offers = getOffers();
-const destitations = getDestinations();
+const destinations = getDestinations();
 
 const getRoute = () => {
   const date = getDate();
@@ -101,7 +101,7 @@ const getRoute = () => {
   return {
     type,
     offers: offers.find((item) => item.type === type).offers,
-    destination: getRandomElementOfArray(destitations),
+    destination: getRandomElementOfArray(destinations),
     isFavorite: Math.random() >= 0.5,
     startTime: date.startTime,
     beginDate: date.beginDate,
@@ -124,7 +124,7 @@ export const getData = () => {
     events: getRoutes(),
     details: {
       offers,
-      destitations
+      destinations
     }
   };
 };
