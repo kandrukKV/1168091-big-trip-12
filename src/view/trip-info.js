@@ -1,11 +1,9 @@
 import AbstractView from './abstract';
+import {sortByDate, getDateDay} from '../utils/events';
 
-const createTotalTemplate = (routes) => {
-  let total = 0;
-  routes.forEach((route) => {
-    total += parseInt(route.price, 10);
-  });
+const MAX_COUNT_CITYES = 3;
 
+const createTotalTemplate = (total) => {
   return (
     `<p class="trip-info__cost">
       Total: &euro;&nbsp;<span class="trip-info__cost-value">${total}</span>
@@ -13,34 +11,69 @@ const createTotalTemplate = (routes) => {
   );
 };
 
-const createMainTemplate = (routes) => {
-  if (routes.length === 0) {
-    return ``;
-  }
+const createMainTemplate = (title, dates) => {
   return (
     `<div class="trip-info__main">
-      <h1 class="trip-info__title">Amsterdam &mdash; Chamonix &mdash; Geneva</h1>
-      <p class="trip-info__dates">Mar 18&nbsp;&mdash;&nbsp;20</p>
+      <h1 class="trip-info__title">${title}</h1>
+      <p class="trip-info__dates">${dates}</p>
     </div>`
   );
 };
 
-const createTripInfoTemplate = (routes = []) => {
+const createTripInfoTemplate = (info = {total: ``, title: ``, dates: ``}) => {
+  const {total, title, dates} = info;
   return (
     `<section class="trip-main__trip-info trip-info">
-      ${createMainTemplate(routes)}
-      ${createTotalTemplate(routes)}
+      ${createMainTemplate(title, dates)}
+      ${createTotalTemplate(total)}
     </section>`
   );
 };
 
 export default class TripInfo extends AbstractView {
-  constructor(routes) {
+  constructor(events) {
     super();
-    this._route = routes;
+    this._tripInfo = this._getTripInfo(events);
   }
 
   getTemplate() {
-    return createTripInfoTemplate(this._route);
+    return createTripInfoTemplate(this._tripInfo);
+  }
+
+  _getTripInfo(events) {
+
+    if (!events.length) {
+      return {};
+    }
+
+    const tempEvents = events.slice().sort(sortByDate);
+
+    let total = 0;
+    let title = ``;
+    let dates = ``;
+
+    tempEvents.forEach((event) => {
+      total += parseInt(event.price, 10);
+    });
+
+    if (tempEvents.length > MAX_COUNT_CITYES) {
+      title = `${tempEvents[0].destination.name.toUpperCase()} &mdash; ... &mdash; ${tempEvents[tempEvents.length - 1].destination.name.toUpperCase()}`;
+    }
+
+    if (tempEvents.length === MAX_COUNT_CITYES) {
+      title = `${tempEvents[0].destination.name.toUpperCase()} &mdash; ${tempEvents[1].destination.name.toUpperCase()} &mdash; ${tempEvents[tempEvents.length - 1].destination.name.toUpperCase()}`;
+    }
+
+    if (tempEvents.length < MAX_COUNT_CITYES) {
+      title = `${tempEvents[0].destination.name.toUpperCase()} &mdash; ${tempEvents[tempEvents.length - 1].destination.name.toUpperCase()}`;
+    }
+
+    dates = `${getDateDay(tempEvents[0].beginDate)}&nbsp;&mdash;&nbsp;${getDateDay(tempEvents[tempEvents.length - 1].endDate)}`;
+
+    return {
+      total,
+      title,
+      dates,
+    };
   }
 }

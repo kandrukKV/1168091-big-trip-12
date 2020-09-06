@@ -73,20 +73,20 @@ const getDate = () => {
 
   currentDate.setHours(getRandomInteger(0, 23), getRandomInteger(0, 59));
 
-  const startTime = currentDate.getTime();
+  // const startTime = currentDate.getTime();
   const beginDate = currentDate.toISOString();
 
   currentDate.setHours(currentDate.getHours() + getRandomInteger(1, 24));
   currentDate.setMinutes(currentDate.getMinutes() + getRandomInteger(5, 59));
 
-  const endTime = currentDate.getTime();
+  // const endTime = currentDate.getTime();
   const endDate = currentDate.toISOString();
 
   return {
     beginDate,
     endDate,
-    startTime,
-    endTime,
+    // startTime,
+    // endTime,
   };
 
 };

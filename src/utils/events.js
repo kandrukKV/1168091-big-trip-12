@@ -31,27 +31,31 @@ export const getDateDay = (dateTime) => {
 
 export const distributeEventsByDays = (events) => {
   const tempArray = [];
-  const unicDates = Array.from(new Set(events.map((item) => getDateDay(item.startTime))));
+  const unicDates = Array.from(new Set(events.map((item) => getDateDay(item.beginDate))));
   unicDates.forEach((el)=> {
-    tempArray.push(events.filter((item) => getDateDay(item.startTime) === el));
+    tempArray.push(events.filter((item) => getDateDay(item.beginDate) === el));
   });
   return tempArray;
 };
 
 export const addZerro = (num) => num <= 9 ? `0` + num : num;
 
+const getUnixTime = (date) => {
+  return Date.parse(date);
+};
+
 export const sortByDate = (a, b) => {
-  return a.startTime > b.startTime ? 1 : -1;
+  return parseInt(getUnixTime(a.beginDate), 10) > parseInt(getUnixTime(b.beginDate), 10) ? 1 : -1;
 };
 
 export const sortByTime = (a, b) => {
-  const durationA = parseInt(a.endTime, 10) - parseInt(a.startTime, 10);
-  const durationB = parseInt(b.endTime, 10) - parseInt(b.startTime, 10);
+  const durationA = parseInt(getUnixTime(a.endDate), 10) - parseInt(getUnixTime(a.beginDate), 10);
+  const durationB = parseInt(getUnixTime(a.endDate), 10) - parseInt(getUnixTime(b.beginDate), 10);
   return durationA > durationB ? 1 : -1;
 };
 
 export const sortByPrice = (a, b) => {
-  return a.price > b.price ? 1 : -1;
+  return parseInt(a.price, 10) > parseInt(b.price, 10) ? 1 : -1;
 };
 
 export const upFirstSymbol = (word) => {

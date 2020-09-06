@@ -12,7 +12,8 @@ const NEW_EVENT_CLASS = `trip-events__item `;
 const DEFAULT_ROUTE = {
   id: null,
   type: `flight`,
-  city: ``,
+  beginDate: new Date().toISOString(),
+  endDate: new Date().toISOString(),
   price: ``,
   date: {
     start: {
@@ -23,7 +24,8 @@ const DEFAULT_ROUTE = {
     }
   },
   offers: [],
-  isFavorite: false
+  isFavorite: false,
+  isNewEventMode: true
 };
 
 const createDestinationTemplate = (destination) => {
@@ -104,10 +106,11 @@ const createEditButtonsBlockTemplate = (eventId, isFavorite, isEditMode) => {
   }
 };
 
-const createEventEditFormTemplate = (details, route = DEFAULT_ROUTE, isEditMode) => {
-  const {id, type, beginDate, endDate, price, isFavorite, destination, offers, isOffersChecked, isDestination} = route;
+const createEventEditFormTemplate = (details, route) => {
+  const {id, type, beginDate, endDate, price, isFavorite, destination, offers, isOffersChecked, isDestination, isNewEventMode} = route;
+  const isEditMode = isNewEventMode ? false : true;
   const cities = details.destinations.map((item) => item.name);
-  const currentCity = destination.name;
+  const currentCity = isDestination ? destination.name : ``;
   const newEventClass = isEditMode ? `` : NEW_EVENT_CLASS;
   const eventEditBlock = createEditButtonsBlockTemplate(id, isFavorite, isEditMode);
 
@@ -213,7 +216,7 @@ const createEventEditFormTemplate = (details, route = DEFAULT_ROUTE, isEditMode)
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-${id}" type="text" name="event-price" value="${price}">
+          <input class="event__input  event__input--price" id="event-price-${id}" type="number" name="event-price" value="${price}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -228,7 +231,7 @@ const createEventEditFormTemplate = (details, route = DEFAULT_ROUTE, isEditMode)
 };
 
 export default class EditForm extends SmartView {
-  constructor(details, event, isEditMode = true) {
+  constructor(details, event = DEFAULT_ROUTE) {
     super();
     this._event = event;
     this._data = EditForm.parseEventToData(event);
@@ -237,9 +240,10 @@ export default class EditForm extends SmartView {
     this._endDatepicker = null;
 
     this._details = details;
-    this._isEditMode = isEditMode;
+
     this._submitHandler = this._submitHandler.bind(this);
     this._favoritChangeHandler = this._favoritChangeHandler.bind(this);
+    this._deleteEventHandler = this._deleteEventHandler.bind(this);
     this._typeChangeHandler = this._typeChangeHandler.bind(this);
     this._cityChangeHandler = this._cityChangeHandler.bind(this);
     this._priceInputHandler = this._priceInputHandler.bind(this);
@@ -247,6 +251,7 @@ export default class EditForm extends SmartView {
     this._offersChangeHandler = this._offersChangeHandler.bind(this);
     this._startDateChangeHandler = this._startDateChangeHandler.bind(this);
     this._endDateChangeHandler = this._endDateChangeHandler.bind(this);
+    this._cancelEventHandler = this._cancelEventHandler.bind(this);
 
     this._setInnerHandlers();
     this._setStartDatepicker();
@@ -254,7 +259,7 @@ export default class EditForm extends SmartView {
   }
 
   getTemplate() {
-    return createEventEditFormTemplate(this._details, this._data, this._isEditMode);
+    return createEventEditFormTemplate(this._details, this._data);
   }
 
   _setStartDatepicker() {
@@ -294,6 +299,11 @@ export default class EditForm extends SmartView {
     }, true);
   }
 
+  _deleteEventHandler(evt) {
+    evt.preventDefault();
+    this._callback.deleteEvent(EditForm.parseDataToEvent(this._data));
+  }
+
   _submitHandler(evt) {
     evt.preventDefault();
     this._callback.submit(EditForm.parseDataToEvent(this._data));
@@ -304,6 +314,11 @@ export default class EditForm extends SmartView {
     if (evt.target.name === FAVORITE_INPUT_NAME) {
       this._callback.favoritChange();
     }
+  }
+
+  _cancelEventHandler(evt) {
+    evt.preventDefault();
+    this._callback.cancelEvent();
   }
 
   _arrowUpHandler() {
@@ -341,7 +356,7 @@ export default class EditForm extends SmartView {
   }
 
   _offersChangeHandler() {
-    // console.log(evt.target);
+    // реализовать обработчик offers;
   }
 
   reset(event) {
@@ -350,9 +365,48 @@ export default class EditForm extends SmartView {
     );
   }
 
+  // Перегружаем метод родителя removeElement,
+  // чтобы при удалении удалялся более ненужный календарь
+  removeElement() {
+    super.removeElement();
+
+    if (this._startDatepicker) {
+      this._startDatepicker.destroy();
+      this._startDatepicker = null;
+    }
+
+    if (this._endDatepicker) {
+      this._endDatepicker.destroy();
+      this._endDatepicker = null;
+    }
+  }
+
+  setFavorite(isFavorite) {
+    this._event.isFavorite = isFavorite;
+    this.updateData({
+      isFavorite
+    });
+  }
+
+  setDeleteHandler(callback) {
+    if (!this._event.isNewEventMode) {
+      this._callback.deleteEvent = callback;
+      this.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, this._deleteEventHandler);
+    }
+  }
+
+  setCancelHandler(callback) {
+    if (this._event.isNewEventMode) {
+      this._callback.cancelEvent = callback;
+      this.getElement().querySelector(`.event__reset-btn`).addEventListener(`click`, this._cancelEventHandler);
+    }
+  }
+
   setFavoritChangeHandler(callback) {
     this._callback.favoritChange = callback;
-    this.getElement().addEventListener(`change`, this._favoritChangeHandler);
+    if (!this._data.isNewEventMode) {
+      this.getElement().addEventListener(`change`, this._favoritChangeHandler);
+    }
   }
 
   setSubmitHandler(callback) {
@@ -362,7 +416,9 @@ export default class EditForm extends SmartView {
 
   setArrowUpClickHandler(callback) {
     this._callback.arrowUp = callback;
-    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._arrowUpHandler);
+    if (!this._data.isNewEventMode) {
+      this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._arrowUpHandler);
+    }
   }
 
   _setInnerHandlers() {
@@ -377,6 +433,8 @@ export default class EditForm extends SmartView {
     this.setSubmitHandler(this._callback.submit);
     this.setFavoritChangeHandler(this._callback.favoritChange);
     this.setArrowUpClickHandler(this._callback.arrowUp);
+    this.setDeleteHandler(this._callback.deleteEvent);
+    this.setCancelHandler(this._callback.cancelEvent);
     this._setStartDatepicker();
     this._setEndDatepicker();
   }
@@ -385,6 +443,7 @@ export default class EditForm extends SmartView {
     data = Object.assign({}, data);
     delete data.isOffersChecked;
     delete data.isDestination;
+    delete data.isNewEventMode;
     return data;
   }
 
@@ -394,7 +453,7 @@ export default class EditForm extends SmartView {
         event,
         {
           isOffersChecked: true,
-          isDestination: false
+          isDestination: false,
         }
     );
   }
