@@ -20,7 +20,6 @@ export default class Smart extends Abstract {
     if (justDataUpdating) {
       return;
     }
-
     this.updateElement();
   }
 
@@ -30,10 +29,9 @@ export default class Smart extends Abstract {
     this.removeElement();
 
     const newElement = this.getElement();
-
     parent.replaceChild(newElement, prevElement);
-    prevElement = null; // Чтобы окончательно "убить" ссылку на prevElement
 
+    prevElement = null;
     this.restoreHandlers();
   }
 

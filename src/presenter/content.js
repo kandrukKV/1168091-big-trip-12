@@ -4,36 +4,66 @@ import DayInfoView from '../view/day-info';
 import EventListView from '../view/event-list';
 import NoEventsView from '../view/no-events';
 import SortView from '../view/events-sort';
+import {filter} from "../utils/filter.js";
 import EventItemPresenter from '../presenter/event-item';
-import {SortType} from '../const';
+import EventNewPresenter from '../presenter/event-new';
+import {SortType, UserAction, UpdateType, FilterType} from '../const';
 import {distributeEventsByDays, sortByDate, sortByTime, sortByPrice, getDateDay} from '../utils/events';
 import {render, RenderPosition, remove} from '../utils/render';
-import {updateElementOfArray} from '../utils/common';
 
 export default class Content {
-  constructor(parentContainer) {
+  constructor(parentContainer, eventsModel, detailsModel, filterModel) {
     this._parentContainer = parentContainer;
+    this._eventsModel = eventsModel;
+    this._detailsModel = detailsModel;
+    this._filterModel = filterModel;
+
     this._contentList = new ContentListView();
     this._noEvents = new NoEventsView();
     this._sortPanel = new SortView();
+
     this._currentSortType = SortType.EVENT;
     this._eventItemPresenter = {};
     this._contentItems = [];
+
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
-    this._handlerEventChange = this._handlerEventChange.bind(this);
+    this._handleViewAction = this._handleViewAction.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
+    this._handleModelEvent = this._handleModelEvent.bind(this);
+
+    this._eventsModel.addObserver(this._handleModelEvent);
+    this._filterModel.addObserver(this._handleModelEvent);
+
+    this._eventNewPresenter = new EventNewPresenter(this._sortPanel, this._handleViewAction, this._detailsModel);
   }
 
-  init(data) {
-    const {events, details} = data;
-    this._details = details;
-    this._data = data;
-    this._originalEvents = events.slice();
-    this._events = events.slice();
+  init() {
     render(this._parentContainer, this._contentList, RenderPosition.BEFOREEND);
     this._renderSort();
-    this._sortEvents(this._currentSortType);
     this._renderEvents();
+  }
+
+  createNewEvent() {
+    this._currentSortType = SortType.EVENT;
+    this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    this._eventNewPresenter.init();
+  }
+
+  _getEvents() {
+
+    const filterType = this._filterModel.getFilter();
+    const events = this._eventsModel.getEvents();
+    const filtredEvents = filter[filterType](events);
+
+    switch (this._currentSortType) {
+      case SortType.EVENT:
+        return filtredEvents.sort(sortByDate);
+      case SortType.TIME:
+        return filtredEvents.sort(sortByTime);
+      case SortType.PRICE:
+        return filtredEvents.sort(sortByPrice);
+    }
+    return filtredEvents;
   }
 
   _renderSort() {
@@ -43,6 +73,7 @@ export default class Content {
   }
 
   _handleModeChange() {
+    this._eventNewPresenter.destroy();
     Object
       .values(this._eventItemPresenter)
       .forEach((presenter) => presenter.resetView());
@@ -50,27 +81,12 @@ export default class Content {
 
   _handleSortTypeChange(sortType) {
     this._currentSortType = sortType;
-    this._sortEvents(sortType);
     this._clearContentList();
     this._renderEvents();
   }
 
-  _sortEvents(sortType) {
-    switch (sortType) {
-      case SortType.EVENT:
-        this._events.sort(sortByDate);
-        break;
-      case SortType.TIME:
-        this._events.sort(sortByTime);
-        break;
-      case SortType.PRICE:
-        this._events.sort(sortByPrice);
-        break;
-    }
-  }
-
   _clearContentList() {
-
+    this._eventNewPresenter.destroy();
     Object.values(this._eventItemPresenter).forEach((presenter)=> {
       presenter.destroy();
     });
@@ -85,22 +101,19 @@ export default class Content {
 
   _renderEvents() {
     // отрисует весь список маршрутов
-    if (this._events.length === 0) {
+    if (this._getEvents().length === 0) {
       this._renderNoEvent();
       return;
     }
-
     if (this._currentSortType === SortType.EVENT) {
-      this._events = distributeEventsByDays(this._events);
-      this._events.forEach((oneDayEvents, i) => {
-        const dayDate = getDateDay(oneDayEvents[0].startTime);
-        this._renderContentItem(oneDayEvents, dayDate, i);
-      });
+      distributeEventsByDays(this._getEvents().slice())
+        .forEach((oneDayEvents, i) => {
+          const dayDate = getDateDay(oneDayEvents[0].beginDate);
+          this._renderContentItem(oneDayEvents, dayDate, i);
+        });
     } else {
-      this._renderContentItem(this._events);
+      this._renderContentItem(this._getEvents());
     }
-
-    this._events = this._originalEvents.slice();
   }
 
   _renderContentItem(oneDayEvents, dayDate, dayNumber) {
@@ -116,16 +129,42 @@ export default class Content {
     render(this._contentList, contentItem, RenderPosition.BEFOREEND);
   }
 
-  _handlerEventChange(route) {
-    this._events = updateElementOfArray(this._events, route);
-    this._originalEvents = updateElementOfArray(this._originalEvents, route);
-    this._eventItemPresenter[route.id].render(route, this._details);
+  _handleViewAction(actionType, updateType, update) {
+    // обработчик реагирует на изменение пользователя
+
+    switch (actionType) {
+      case UserAction.UPDATE_EVENT:
+        this._eventsModel.updateEvent(updateType, update);
+        break;
+      case UserAction.ADD_EVENT:
+        this._eventsModel.addEvent(updateType, update);
+        break;
+      case UserAction.DELETE_EVENT:
+        this._eventsModel.deleteEvent(updateType, update);
+        break;
+    }
+  }
+
+  _handleModelEvent(updateType, data) {
+    // обработчик реагирует на изменение модели
+    switch (updateType) {
+      case UpdateType.PATCH:
+        this._eventItemPresenter[data.id].setFavorite(data.isFavorite);
+        break;
+      case UpdateType.MINOR:
+        // - обновить список (например, когда задача ушла в архив)
+        break;
+      case UpdateType.MAJOR:
+        this._clearContentList();
+        this._renderEvents();
+        break;
+    }
   }
 
   _renderEvent(parentContainer, event) {
-    const eventItemPresenter = new EventItemPresenter(parentContainer, this._handlerEventChange, this._handleModeChange);
+    const eventItemPresenter = new EventItemPresenter(parentContainer, this._handleViewAction, this._handleModeChange, this._detailsModel);
     this._eventItemPresenter[event.id] = eventItemPresenter;
-    eventItemPresenter.render(event, this._details);
+    eventItemPresenter.render(event);
   }
 
   _renderNoEvent() {

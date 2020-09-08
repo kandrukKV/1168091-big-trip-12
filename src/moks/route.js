@@ -73,26 +73,24 @@ const getDate = () => {
 
   currentDate.setHours(getRandomInteger(0, 23), getRandomInteger(0, 59));
 
-  const startTime = currentDate.getTime();
   const beginDate = currentDate.toISOString();
 
   currentDate.setHours(currentDate.getHours() + getRandomInteger(1, 24));
   currentDate.setMinutes(currentDate.getMinutes() + getRandomInteger(5, 59));
 
-  const endTime = currentDate.getTime();
   const endDate = currentDate.toISOString();
 
   return {
     beginDate,
     endDate,
-    startTime,
-    endTime,
+    // startTime,
+    // endTime,
   };
 
 };
 
 const offers = getOffers();
-const destitations = getDestinations();
+const destinations = getDestinations();
 
 const getRoute = () => {
   const date = getDate();
@@ -101,7 +99,7 @@ const getRoute = () => {
   return {
     type,
     offers: offers.find((item) => item.type === type).offers,
-    destination: getRandomElementOfArray(destitations),
+    destination: getRandomElementOfArray(destinations),
     isFavorite: Math.random() >= 0.5,
     startTime: date.startTime,
     beginDate: date.beginDate,
@@ -124,7 +122,7 @@ export const getData = () => {
     events: getRoutes(),
     details: {
       offers,
-      destitations
+      destinations
     }
   };
 };

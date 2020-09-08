@@ -22,7 +22,6 @@ const createEventTemplate = (route) => {
 
   const {type, price, offers, destination, beginDate, endDate} = route;
 
-  // const duration = transformDuration(parseInt(endTime, 10) - parseInt(startTime, 10));
   const duration = getDuration(beginDate, endDate);
 
   return (

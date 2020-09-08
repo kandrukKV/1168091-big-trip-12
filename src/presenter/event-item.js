@@ -2,6 +2,7 @@ import EventItemView from '../view/event-item';
 import EventView from '../view/event';
 import EventEditFormView from '../view/event-edit';
 import {render, replace, RenderPosition, remove} from '../utils/render';
+import {UserAction, UpdateType} from '../const';
 
 const Mode = {
   DEFAULT: `DEFAULT`,
@@ -9,9 +10,11 @@ const Mode = {
 };
 
 export default class EventItem {
-  constructor(eventItemContainer, changeData, changeMode) {
+  constructor(eventItemContainer, changeData, changeMode, detailsModel) {
     this._eventItemContainer = eventItemContainer;
+    this._detailsModel = detailsModel;
     this._changeData = changeData;
+    this._details = this._detailsModel.getDetails();
     this._route = null;
     this._eventItem = new EventItemView();
     this._event = null;
@@ -24,19 +27,20 @@ export default class EventItem {
     this._editFormSubmitHandler = this._editFormSubmitHandler.bind(this);
     this._favoriteChangeHandler = this._favoriteChangeHandler.bind(this);
     this._arrowUpClickHandler = this._arrowUpClickHandler.bind(this);
+    this._deleteFormHandler = this._deleteFormHandler.bind(this);
   }
 
-  render(route, details) {
+  render(route) {
     this._route = route;
-    this._details = details;
     const prevEvent = this._event;
     const prevEventEditForm = this._eventEditForm;
 
     this._event = new EventView(route);
-    this._eventEditForm = new EventEditFormView(details, route);
+    this._eventEditForm = new EventEditFormView(this._details, route);
 
     this._event.setClickHandler(this._eventEditClickHandler);
     this._eventEditForm.setSubmitHandler(this._editFormSubmitHandler);
+    this._eventEditForm.setDeleteHandler(this._deleteFormHandler);
     this._eventEditForm.setFavoritChangeHandler(this._favoriteChangeHandler);
     this._eventEditForm.setArrowUpClickHandler(this._arrowUpClickHandler);
 
@@ -59,6 +63,10 @@ export default class EventItem {
 
   }
 
+  setFavorite(isFavorite) {
+    this._eventEditForm.setFavorite(isFavorite);
+  }
+
   resetView() {
     if (this._mode !== Mode.DEFAULT) {
       this._replaceFormToEvent();
@@ -70,6 +78,7 @@ export default class EventItem {
     remove(this._eventEditForm);
     remove(this._eventItem);
   }
+
 
   _replaceEventToForm() {
     replace(this._eventEditForm, this._event);
@@ -94,13 +103,35 @@ export default class EventItem {
   }
 
   _editFormSubmitHandler(route) {
-    this._changeData(route);
+    this._changeData(
+        UserAction.UPDATE_EVENT,
+        UpdateType.MAJOR,
+        route
+    );
     this._replaceFormToEvent();
     document.removeEventListener(`keydown`, this._escKeyDownHandler);
   }
 
+  _deleteFormHandler(route) {
+    this._changeData(
+        UserAction.DELETE_EVENT,
+        UpdateType.MAJOR,
+        route
+    );
+  }
+
   _favoriteChangeHandler() {
-    this._changeData(Object.assign({}, this._route, {isFavorite: !this._route.isFavorite}));
+    this._changeData(
+        UserAction.UPDATE_EVENT,
+        UpdateType.PATCH,
+        Object.assign(
+            {},
+            this._route,
+            {
+              isFavorite: !this._route.isFavorite
+            }
+        )
+    );
   }
 
   _escKeyDownHandler(evt) {
@@ -108,6 +139,7 @@ export default class EventItem {
       evt.preventDefault();
       this._eventEditForm.reset(this._route);
       this._replaceFormToEvent();
+      document.removeEventListener(`keydown`, this._escKeyDownHandler);
     }
   }
 }
