@@ -44,7 +44,7 @@ export default class EventNew {
 
   _handleFormSubmit(event) {
     this._changeData(
-        UserAction.ADD_TASK,
+        UserAction.ADD_EVENT,
         UpdateType.MAJOR,
         // Пока у нас нет сервера, который бы после сохранения
         // выдывал честный id задачи, нам нужно позаботиться об этом самим

@@ -2,7 +2,6 @@ import ContentPresenter from './presenter/content';
 import SiteMenuView from './view/site-menu';
 import TripInfoPresenter from './presenter/trip-info';
 import EventsModel from './model/events';
-import OffersModel from './model/offers';
 import DetailsModel from './model/details';
 import FilterModel from './model/filter.js';
 import FilterPresenter from './presenter/filter';

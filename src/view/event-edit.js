@@ -347,12 +347,16 @@ export default class EditForm extends SmartView {
   }
 
   _cityChangeHandler(evt) {
-    this.updateData({
-      destination: this._details.destinations.find((item) => item.name === evt.target.value),
-      offers: this._details.offers.find((item) => item.type === this._data.type).offers,
-      isOffersChecked: false,
-      isDestination: true
-    });
+    if (this._details.destinations.find((item) => item.name === evt.target.value)) {
+      this.updateData({
+        destination: this._details.destinations.find((item) => item.name === evt.target.value),
+        offers: this._details.offers.find((item) => item.type === this._data.type).offers,
+        isOffersChecked: false,
+        isDestination: true
+      });
+    } else {
+      evt.target.value = ``;
+    }
   }
 
   _offersChangeHandler() {

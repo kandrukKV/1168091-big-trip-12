@@ -104,7 +104,7 @@ export default class EventItem {
 
   _editFormSubmitHandler(route) {
     this._changeData(
-        UserAction.UPDATE_TASK,
+        UserAction.UPDATE_EVENT,
         UpdateType.MAJOR,
         route
     );
@@ -114,7 +114,7 @@ export default class EventItem {
 
   _deleteFormHandler(route) {
     this._changeData(
-        UserAction.DELETE_TASK,
+        UserAction.DELETE_EVENT,
         UpdateType.MAJOR,
         route
     );
@@ -122,7 +122,7 @@ export default class EventItem {
 
   _favoriteChangeHandler() {
     this._changeData(
-        UserAction.UPDATE_TASK,
+        UserAction.UPDATE_EVENT,
         UpdateType.PATCH,
         Object.assign(
             {},
