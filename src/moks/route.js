@@ -83,8 +83,6 @@ const getDate = () => {
   return {
     beginDate,
     endDate,
-    // startTime,
-    // endTime,
   };
 
 };
@@ -101,10 +99,8 @@ const getRoute = () => {
     offers: offers.find((item) => item.type === type).offers,
     destination: getRandomElementOfArray(destinations),
     isFavorite: Math.random() >= 0.5,
-    startTime: date.startTime,
     beginDate: date.beginDate,
     endDate: date.endDate,
-    endTime: date.endTime,
     price: getRandomInteger(20, 200),
   };
 };

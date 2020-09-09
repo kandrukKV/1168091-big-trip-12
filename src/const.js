@@ -21,3 +21,14 @@ export const FilterType = {
   FUTURE: `future`,
   PAST: `past`,
 };
+
+export const MenuItem = {
+  TABLE: `Table`,
+  STATS: `Stats`
+};
+
+export const Preposition = {
+  CHECK_IN: `Check-in`,
+  SIGHTSEEING: `Sightseeing`,
+  RESTAURANT: `Restaurant`
+};

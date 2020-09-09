@@ -31,16 +31,27 @@ export default class Content {
     this._handleModeChange = this._handleModeChange.bind(this);
     this._handleModelEvent = this._handleModelEvent.bind(this);
 
-    this._eventsModel.addObserver(this._handleModelEvent);
-    this._filterModel.addObserver(this._handleModelEvent);
 
     this._eventNewPresenter = new EventNewPresenter(this._sortPanel, this._handleViewAction, this._detailsModel);
   }
 
   init() {
+    this._eventsModel.addObserver(this._handleModelEvent);
+    this._filterModel.addObserver(this._handleModelEvent);
     render(this._parentContainer, this._contentList, RenderPosition.BEFOREEND);
     this._renderSort();
     this._renderEvents();
+  }
+
+  destroy() {
+    this._eventsModel.removeObserver(this._handleModelEvent);
+    this._filterModel.removeObserver(this._handleModelEvent);
+    remove(this._sortPanel);
+    this._clearContentList();
+  }
+
+  setSortType(sortType) {
+    this._currentSortType = sortType;
   }
 
   createNewEvent() {

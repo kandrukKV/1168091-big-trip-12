@@ -1,8 +1,4 @@
-export const Preposition = {
-  CHECK_IN: `Check-in`,
-  SIGHTSEEING: `Sightseeing`,
-  RESTAURANT: `Restaurant`
-};
+import {Preposition} from '../const';
 
 export const getPreposition = (type) => {
   return (type === Preposition.CHECK_IN || type === Preposition.SIGHTSEEING || type === Preposition.RESTAURANT) ? ` in ` : ` to `;
