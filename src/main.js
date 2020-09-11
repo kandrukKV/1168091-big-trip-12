@@ -7,19 +7,31 @@ import DetailsModel from './model/details';
 import FilterModel from './model/filter.js';
 import FilterPresenter from './presenter/filter';
 import {MenuItem, UpdateType, FilterType, SortType} from './const';
-
-import {getData} from './moks/route';
+import Api from "./api.js";
 
 import {render, RenderPosition, remove} from './utils/render';
 
-const data = getData();
-const {events, details} = data;
+const AUTHORIZATION = `Basic kandrukSyaDru`;
+const END_POINT = `https://12.ecmascript.pages.academy/big-trip/`;
+
+const api = new Api(END_POINT, AUTHORIZATION);
 
 const eventsModel = new EventsModel();
-eventsModel.setEvents(events);
-
 const detailsModel = new DetailsModel();
-detailsModel.setDetails(details);
+
+api.getEvents()
+  .then((events) => {
+    eventsModel.setEvents(UpdateType.INIT, events);
+  })
+  .catch(() => {
+    console.log(`сработал catch!`);
+    eventsModel.setEvents(UpdateType.INIT, []);
+  });
+
+api.getDetails()
+  .then((details) => {
+    detailsModel.setDetails(details);
+  });
 
 const siteTripMainElement = document.querySelector(`.trip-main`);
 const siteTripControlsElement = siteTripMainElement.querySelector(`.trip-main__trip-controls`);
@@ -38,9 +50,9 @@ const filterPresenter = new FilterPresenter(siteTripControlsElement, filterModel
 filterPresenter.init();
 
 const contentPresenter = new ContentPresenter(siteTripEventsElement, eventsModel, detailsModel, filterModel);
-contentPresenter.init(data);
+contentPresenter.init();
 
-const statisticComponent = new StatisticView(events);
+const statisticComponent = new StatisticView();
 
 document.querySelector(`.trip-main__event-add-btn`).addEventListener(`click`, (evt) => {
   evt.preventDefault();
@@ -53,13 +65,13 @@ const handleSiteMenuClick = (menuItem) => {
       remove(statisticComponent);
       filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
       contentPresenter.setSortType(SortType.EVENT);
-      contentPresenter.init(data);
+      contentPresenter.init();
 
       break;
     case MenuItem.STATS:
       contentPresenter.destroy();
       render(siteTripEventsElement, statisticComponent, RenderPosition.AFTEREND);
-      statisticComponent.setCharts();
+      statisticComponent.setCharts(eventsModel.getEvents());
       break;
   }
 };

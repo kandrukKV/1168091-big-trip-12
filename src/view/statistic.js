@@ -94,10 +94,10 @@ const renderChart = (ctx, title, labels, data, prefix) => {
 
 
 export default class StatisticView extends SmartView {
-  constructor(events) {
+  constructor() {
     super();
 
-    this._events = events;
+    this._events = null;
 
     this._moneyChart = null;
     this._transportChart = null;
@@ -109,7 +109,8 @@ export default class StatisticView extends SmartView {
     return createStatisticTemplate();
   }
 
-  setCharts() {
+  setCharts(events) {
+    this._events = events;
     const moneyCtx = this.getElement().querySelector(`.statistics__chart--money`);
     const transportCtx = this.getElement().querySelector(`.statistics__chart--transport`);
     const timeSpendCtx = this.getElement().querySelector(`.statistics__chart--time`);

@@ -4,6 +4,7 @@ import DayInfoView from '../view/day-info';
 import EventListView from '../view/event-list';
 import NoEventsView from '../view/no-events';
 import SortView from '../view/events-sort';
+import LoadingView from '../view/loading';
 import {filter} from "../utils/filter.js";
 import EventItemPresenter from '../presenter/event-item';
 import EventNewPresenter from '../presenter/event-new';
@@ -18,9 +19,12 @@ export default class Content {
     this._detailsModel = detailsModel;
     this._filterModel = filterModel;
 
+    this._isLoading = true;
+
     this._contentList = new ContentListView();
     this._noEvents = new NoEventsView();
     this._sortPanel = new SortView();
+    this._loadingComponent = new LoadingView();
 
     this._currentSortType = SortType.EVENT;
     this._eventItemPresenter = {};
@@ -112,10 +116,16 @@ export default class Content {
 
   _renderEvents() {
     // отрисует весь список маршрутов
+    if (this._isLoading) {
+      this._renderLoading();
+      return;
+    }
+
     if (this._getEvents().length === 0) {
       this._renderNoEvent();
       return;
     }
+
     if (this._currentSortType === SortType.EVENT) {
       distributeEventsByDays(this._getEvents().slice())
         .forEach((oneDayEvents, i) => {
@@ -158,15 +168,19 @@ export default class Content {
 
   _handleModelEvent(updateType, data) {
     // обработчик реагирует на изменение модели
+    console.log(`_handleModelEvent run rE`);
     switch (updateType) {
       case UpdateType.PATCH:
         this._eventItemPresenter[data.id].setFavorite(data.isFavorite);
         break;
-      case UpdateType.MINOR:
-        // - обновить список (например, когда задача ушла в архив)
-        break;
       case UpdateType.MAJOR:
         this._clearContentList();
+        this._renderEvents();
+        break;
+      case UpdateType.INIT:
+        console.log(`update.type INIT`, this._getEvents());
+        this._isLoading = false;
+        remove(this._loadingComponent);
         this._renderEvents();
         break;
     }
@@ -176,6 +190,10 @@ export default class Content {
     const eventItemPresenter = new EventItemPresenter(parentContainer, this._handleViewAction, this._handleModeChange, this._detailsModel);
     this._eventItemPresenter[event.id] = eventItemPresenter;
     eventItemPresenter.render(event);
+  }
+
+  _renderLoading() {
+    render(this._contentList, this._loadingComponent, RenderPosition.BEFOREEND);
   }
 
   _renderNoEvent() {

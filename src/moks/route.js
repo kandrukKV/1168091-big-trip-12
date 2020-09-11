@@ -27,11 +27,14 @@ const getDescription = () => {
 };
 
 const getPhotos = () => {
-  const photos = [];
+  const pictures = [];
   for (let i = 0; i < getRandomInteger(0, 5); i++) {
-    photos.push(`http://picsum.photos/248/152?r=${Math.random()}`);
+    pictures.push({
+      src: `http://picsum.photos/248/152?r=${Math.random()}`,
+      description: `description` + i
+    });
   }
-  return photos;
+  return pictures;
 };
 
 const getDestinations = () => {
@@ -39,8 +42,8 @@ const getDestinations = () => {
   CITIES.forEach((city) => {
     destitations.push({
       name: city,
-      title: `${city}, ${getDescription()}`,
-      photos: getPhotos()
+      description: `${city}, ${getDescription()}`,
+      pictures: getPhotos()
     });
   });
 
