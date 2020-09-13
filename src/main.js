@@ -8,48 +8,30 @@ import FilterModel from './model/filter.js';
 import FilterPresenter from './presenter/filter';
 import {MenuItem, UpdateType, FilterType, SortType} from './const';
 import Api from "./api.js";
-
 import {render, RenderPosition, remove} from './utils/render';
 
 const AUTHORIZATION = `Basic kandrukSyaDru`;
 const END_POINT = `https://12.ecmascript.pages.academy/big-trip/`;
+const siteTripMainElement = document.querySelector(`.trip-main`);
+const siteTripControlsElement = siteTripMainElement.querySelector(`.trip-main__trip-controls`);
+const siteMenuElement = siteTripMainElement.querySelector(`h2`);
+const siteTripEventsElement = document.querySelector(`.trip-events`);
 
 const api = new Api(END_POINT, AUTHORIZATION);
 
 const eventsModel = new EventsModel();
 const detailsModel = new DetailsModel();
 
-api.getEvents()
-  .then((events) => {
-    eventsModel.setEvents(UpdateType.INIT, events);
-  })
-  .catch(() => {
-    console.log(`сработал catch!`);
-    eventsModel.setEvents(UpdateType.INIT, []);
-  });
-
-api.getDetails()
-  .then((details) => {
-    detailsModel.setDetails(details);
-  });
-
-const siteTripMainElement = document.querySelector(`.trip-main`);
-const siteTripControlsElement = siteTripMainElement.querySelector(`.trip-main__trip-controls`);
-const siteMenuElement = siteTripMainElement.querySelector(`h2`);
-const siteTripEventsElement = document.querySelector(`.trip-events`);
-
 const siteMenuComponent = new SiteMenuView();
-render(siteMenuElement, siteMenuComponent, RenderPosition.AFTEREND);
-
-const filterModel = new FilterModel();
 
 const tripInfoPresenter = new TripInfoPresenter(siteTripMainElement, eventsModel);
 tripInfoPresenter.init();
 
+const filterModel = new FilterModel();
 const filterPresenter = new FilterPresenter(siteTripControlsElement, filterModel, eventsModel);
 filterPresenter.init();
 
-const contentPresenter = new ContentPresenter(siteTripEventsElement, eventsModel, detailsModel, filterModel);
+const contentPresenter = new ContentPresenter(siteTripEventsElement, eventsModel, detailsModel, filterModel, api);
 contentPresenter.init();
 
 const statisticComponent = new StatisticView();
@@ -66,7 +48,6 @@ const handleSiteMenuClick = (menuItem) => {
       filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
       contentPresenter.setSortType(SortType.EVENT);
       contentPresenter.init();
-
       break;
     case MenuItem.STATS:
       contentPresenter.destroy();
@@ -75,5 +56,15 @@ const handleSiteMenuClick = (menuItem) => {
       break;
   }
 };
+
+api.getAllData()
+  .then((allData) => {
+    detailsModel.setDetails({
+      destinations: allData[1],
+      offers: allData[2]
+    });
+    render(siteMenuElement, siteMenuComponent, RenderPosition.AFTEREND);
+    eventsModel.setEvents(UpdateType.INIT, allData[0]);
+  });
 
 siteMenuComponent.setMenuClickHandler(handleSiteMenuClick);

@@ -13,11 +13,12 @@ import {distributeEventsByDays, sortByDate, sortByTime, sortByPrice, getDateDay}
 import {render, RenderPosition, remove} from '../utils/render';
 
 export default class Content {
-  constructor(parentContainer, eventsModel, detailsModel, filterModel) {
+  constructor(parentContainer, eventsModel, detailsModel, filterModel, api) {
     this._parentContainer = parentContainer;
     this._eventsModel = eventsModel;
     this._detailsModel = detailsModel;
     this._filterModel = filterModel;
+    this._api = api;
 
     this._isLoading = true;
 
@@ -155,7 +156,10 @@ export default class Content {
 
     switch (actionType) {
       case UserAction.UPDATE_EVENT:
-        this._eventsModel.updateEvent(updateType, update);
+        this._api.updateEvent(update)
+          .then((response) => {
+            this._eventsModel.updateEvent(updateType, response);
+          });
         break;
       case UserAction.ADD_EVENT:
         this._eventsModel.addEvent(updateType, update);
@@ -168,7 +172,6 @@ export default class Content {
 
   _handleModelEvent(updateType, data) {
     // обработчик реагирует на изменение модели
-    console.log(`_handleModelEvent run rE`);
     switch (updateType) {
       case UpdateType.PATCH:
         this._eventItemPresenter[data.id].setFavorite(data.isFavorite);
@@ -178,7 +181,6 @@ export default class Content {
         this._renderEvents();
         break;
       case UpdateType.INIT:
-        console.log(`update.type INIT`, this._getEvents());
         this._isLoading = false;
         remove(this._loadingComponent);
         this._renderEvents();

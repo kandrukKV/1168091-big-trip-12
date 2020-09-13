@@ -6,7 +6,7 @@ const MAX_COUNT_CITYES = 3;
 const createTotalTemplate = (total) => {
   return (
     `<p class="trip-info__cost">
-      Total: &euro;&nbsp;<span class="trip-info__cost-value">${total}</span>
+      Total: &euro;&nbsp;<span class="trip-info__cost-value">${total ? total : `0`}</span>
     </p>`
   );
 };
@@ -14,13 +14,13 @@ const createTotalTemplate = (total) => {
 const createMainTemplate = (title, dates) => {
   return (
     `<div class="trip-info__main">
-      <h1 class="trip-info__title">${title}</h1>
-      <p class="trip-info__dates">${dates}</p>
+      <h1 class="trip-info__title">${title ? title : ``}</h1>
+      <p class="trip-info__dates">${dates ? dates : ``}</p>
     </div>`
   );
 };
 
-const createTripInfoTemplate = (info = {total: ``, title: ``, dates: ``}) => {
+const createTripInfoTemplate = (info) => {
   const {total, title, dates} = info;
   return (
     `<section class="trip-main__trip-info trip-info">

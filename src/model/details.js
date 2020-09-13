@@ -7,10 +7,7 @@ export default class Details extends Observer {
   }
 
   setDetails(details) {
-    this._details = {
-      destinations: details[0],
-      offers: details[1]
-    };
+    this._details = details;
   }
 
   getDetails() {

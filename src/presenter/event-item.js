@@ -108,8 +108,8 @@ export default class EventItem {
         UpdateType.MAJOR,
         route
     );
-    this._replaceFormToEvent();
-    document.removeEventListener(`keydown`, this._escKeyDownHandler);
+    // this._replaceFormToEvent();
+    // document.removeEventListener(`keydown`, this._escKeyDownHandler);
   }
 
   _deleteFormHandler(route) {

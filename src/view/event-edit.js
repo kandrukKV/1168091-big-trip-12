@@ -49,8 +49,7 @@ const createDestinationTemplate = (destination) => {
   );
 };
 
-const createOffersTemplate = (offers, isChecked) => {
-
+const createOffersTemplate = (offers) => {
   if (offers.length === 0) {
     return ``;
   }
@@ -58,9 +57,9 @@ const createOffersTemplate = (offers, isChecked) => {
   const innerTemplate = offers.map((item, index) => {
     return (
       `<div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${index}" type="checkbox" name="event-offer-luggage" ${isChecked ? `checked` : ``}>
+        <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${index}" type="checkbox" name="event-offer-luggage" value="${item.title}" ${item.isChecked ? `checked` : ``}>
         <label class="event__offer-label" for="event-offer-luggage-${index}">
-          <span class="event__offer-title">${item.name}</span>
+          <span class="event__offer-title">${item.title}</span>
           &plus;
           &euro;&nbsp;<span class="event__offer-price">${item.price}</span>
         </label>
@@ -86,10 +85,10 @@ const createCitiesTemplate = (cities) => {
   }).join(``);
 };
 
-const createEditButtonsBlockTemplate = (eventId, isFavorite, isEditMode) => {
+const createEditButtonsBlockTemplate = (eventId, isFavorite, isEditMode, isDeleting) => {
   if (isEditMode) {
     return (
-      `<button class="event__reset-btn" type="reset">Delete</button>
+      `<button class="event__reset-btn" type="reset">${isDeleting ? `Deleting...` : `Delete`}</button>
       <input id="event-favorite-${eventId}" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${isFavorite ? `checked` : ``}>
       <label class="event__favorite-btn" for="event-favorite-${eventId}">
         <span class="visually-hidden">Add to favorite</span>
@@ -106,13 +105,28 @@ const createEditButtonsBlockTemplate = (eventId, isFavorite, isEditMode) => {
   }
 };
 
-const createEventEditFormTemplate = (details, route) => {
-  const {id, type, beginDate, endDate, price, isFavorite, destination, offers, isOffersChecked, isDestination, isNewEventMode} = route;
+const createEventEditFormTemplate = (destinations, route) => {
+  const {
+    id,
+    type,
+    beginDate,
+    endDate,
+    price,
+    isFavorite,
+    destination,
+    offers,
+    isOffersChecked,
+    isDestination,
+    isNewEventMode,
+    isSaving,
+    isDeleting
+  } = route;
+
   const isEditMode = isNewEventMode ? false : true;
-  const cities = details.destinations.map((item) => item.name);
-  const currentCity = isDestination ? destination.name : ``;
+  const cities = destinations.map((item) => item.name);
+  const currentCity = destination.name;
   const newEventClass = isEditMode ? `` : NEW_EVENT_CLASS;
-  const eventEditBlock = createEditButtonsBlockTemplate(id, isFavorite, isEditMode);
+  const eventEditBlock = createEditButtonsBlockTemplate(id, isFavorite, isEditMode, isDeleting);
 
 
   const dateFrom = getFullDate(beginDate);
@@ -219,7 +233,7 @@ const createEventEditFormTemplate = (details, route) => {
           <input class="event__input  event__input--price" id="event-price-${id}" type="number" name="event-price" value="${price}">
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit">${isSaving ? `Saving...` : `Save`}</button>
         ${eventEditBlock}
       </header>
       <section class="event__details">
@@ -233,8 +247,14 @@ const createEventEditFormTemplate = (details, route) => {
 export default class EditForm extends SmartView {
   constructor(details, event = DEFAULT_ROUTE) {
     super();
+    const {offers, destinations} = details;
     this._event = event;
-    this._data = EditForm.parseEventToData(event);
+
+    this._allOffers = offers;
+    this._destinations = destinations;
+
+
+    this._data = EditForm.parseEventToData(event, this._allOffers);
 
     this._startDatepicker = null;
     this._endDatepicker = null;
@@ -259,7 +279,7 @@ export default class EditForm extends SmartView {
   }
 
   getTemplate() {
-    return createEventEditFormTemplate(this._details, this._data);
+    return createEventEditFormTemplate(this._destinations, this._data);
   }
 
   _setStartDatepicker() {
@@ -301,11 +321,17 @@ export default class EditForm extends SmartView {
 
   _deleteEventHandler(evt) {
     evt.preventDefault();
+    this.updateData({
+      isDeleting: true
+    });
     this._callback.deleteEvent(EditForm.parseDataToEvent(this._data));
   }
 
   _submitHandler(evt) {
     evt.preventDefault();
+    this.updateData({
+      isSaving: true
+    });
     this._callback.submit(EditForm.parseDataToEvent(this._data));
   }
 
@@ -328,7 +354,7 @@ export default class EditForm extends SmartView {
   _priceInputHandler(evt) {
     evt.preventDefault();
     this.updateData({
-      price: evt.target.value,
+      price: parseInt(evt.target.value, 10),
     }, true);
   }
 
@@ -337,9 +363,16 @@ export default class EditForm extends SmartView {
       let type = evt.target.value;
       this.updateData({
         type,
-        price: ``,
-        destination: {name: ``},
-        offers: this._details.offers.find((item) => item.type === type).offers,
+        price: 0,
+        destination: {
+          name: ``
+        },
+        offers: this._allOffers
+          .find((item) => item.type === type).offers
+          .map((offer) => {
+            offer.isChecked = false;
+            return offer;
+          }),
         isDestination: false,
         isOffersChecked: false
       });
@@ -347,10 +380,9 @@ export default class EditForm extends SmartView {
   }
 
   _cityChangeHandler(evt) {
-    if (this._details.destinations.find((item) => item.name === evt.target.value)) {
+    if (this._destinations.find((item) => item.name === evt.target.value)) {
       this.updateData({
-        destination: this._details.destinations.find((item) => item.name === evt.target.value),
-        offers: this._details.offers.find((item) => item.type === this._data.type).offers,
+        destination: this._destinations.find((item) => item.name === evt.target.value),
         isOffersChecked: false,
         isDestination: true
       });
@@ -359,13 +391,20 @@ export default class EditForm extends SmartView {
     }
   }
 
-  _offersChangeHandler() {
-    // реализовать обработчик offers;
+  _offersChangeHandler(evt) {
+    this.updateData({
+      offers: this._data.offers.map((offer) => {
+        if (offer.title === evt.target.value) {
+          offer.isChecked = evt.target.checked;
+        }
+        return offer;
+      })
+    }, true);
   }
 
   reset(event) {
     this.updateData(
-        EditForm.parseEventToData(event)
+        EditForm.parseEventToData(event, this._allOffers)
     );
   }
 
@@ -444,20 +483,49 @@ export default class EditForm extends SmartView {
   }
 
   static parseDataToEvent(data) {
-    data = Object.assign({}, data);
+    data = Object.assign(
+        {},
+        data,
+        {
+          offers: data.offers
+            .filter((offer) => offer.isChecked === true)
+            .map((offer) => {
+              delete offer.isChecked;
+              return offer;
+            })
+        }
+    );
+
     delete data.isOffersChecked;
     delete data.isDestination;
     delete data.isNewEventMode;
+    delete data.isSaving;
+    delete data.isDeleting;
+
     return data;
   }
 
-  static parseEventToData(event) {
+  static parseEventToData(event, allOffers) {
+
+    const newOffers = allOffers.find((item) => item.type === event.type).offers;
+
     return Object.assign(
         {},
         event,
         {
           isOffersChecked: true,
           isDestination: false,
+          isSaving: false,
+          isDeleting: false,
+          offers: newOffers.map((offer) => {
+            return Object.assign(
+                {},
+                offer,
+                {
+                  isChecked: event.offers.find((el) => offer.title === el.title) ? true : false
+                }
+            );
+          })
         }
     );
   }

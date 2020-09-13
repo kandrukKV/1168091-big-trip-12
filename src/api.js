@@ -16,30 +16,41 @@ export default class Api {
     this._authorization = authorization;
   }
 
-  getEvents() {
+  _getEvents() {
     return this._load({url: `points`})
       .then(Api.toJSON)
-      .then((events) => events.map((event) => EventsModel.adaptToClient(event)));
+      .then((events) => {
+        return events.map((event) => EventsModel.adaptToClient(event));
+      })
+      .catch(() => []);
   }
 
-  getDetails() {
-    const destinations = this._load({url: `destinations`})
+  _getDestinations() {
+    return this._load({url: `destinations`})
       .then(Api.toJSON)
       .catch(() => []);
-    const offers = this._load({url: `offers`})
-      .then(Api.toJSON)
-      .catch(() => []);
-    return Promise.all([destinations, offers]);
   }
 
-  updateEvents(event) {
+  _getOffers() {
+    return this._load({url: `offers`})
+      .then(Api.toJSON)
+      .catch(() => []);
+  }
+
+  getAllData() {
+    return Promise.all([this._getEvents(), this._getDestinations(), this._getOffers()]);
+  }
+
+  updateEvent(event) {
+    const data = EventsModel.adaptToServer(event);
     return this._load({
-      url: `big-trip/${event.id}`,
+      url: `points/${event.id}`,
       method: Method.PUT,
-      body: JSON.stringify(event),
+      body: JSON.stringify(data),
       headers: new Headers({"Content-Type": `application/json`})
     })
-      .then(Api.toJSON);
+      .then(Api.toJSON)
+      .then(EventsModel.adaptToClient);
   }
 
   _load({
