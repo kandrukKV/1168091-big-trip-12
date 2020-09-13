@@ -9,7 +9,7 @@ const getOffersTemplate = (offers) => {
   return offers.slice(0, offersLength).map((item) => {
     return (
       `<li class="event__offer">
-        <span class="event__offer-title">${item.name}</span>
+        <span class="event__offer-title">${item.title}</span>
         &plus;
         &euro;&nbsp;<span class="event__offer-price">${item.price}</span>
       </li>`
