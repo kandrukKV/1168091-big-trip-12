@@ -1,13 +1,13 @@
 import EventEditFormView from '../view/event-edit';
-import {generateId} from '../utils/common';
 import {remove, render, RenderPosition} from "../utils/render.js";
 import {UserAction, UpdateType} from "../const.js";
 
 export default class EventNew {
-  constructor(parentContainer, changeData, detailsModel) {
+  constructor(parentContainer, changeData, detailsModel, newEventBtn) {
     this._parentContainer = parentContainer;
     this._changeData = changeData;
     this._detailsModel = detailsModel;
+    this._newEventBtn = newEventBtn;
 
     this._eventNewComponent = null;
 
@@ -42,24 +42,43 @@ export default class EventNew {
     document.removeEventListener(`keydown`, this._escKeyDownHandler);
   }
 
+  setSaving() {
+    this._eventNewComponent.updateData({
+      isDisabled: true,
+      isSaving: true
+    });
+  }
+
+  setAborting() {
+    const resetFormState = () => {
+      this._eventNewComponent.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false
+      });
+    };
+
+    this._eventNewComponent.shake(resetFormState);
+  }
+
+
   _handleFormSubmit(event) {
     this._changeData(
         UserAction.ADD_EVENT,
         UpdateType.MAJOR,
-        // Пока у нас нет сервера, который бы после сохранения
-        // выдывал честный id задачи, нам нужно позаботиться об этом самим
-        Object.assign({id: generateId()}, event)
+        event
     );
-    this.destroy();
   }
 
   _handleCancelClick() {
+    this._newEventBtn.enableBtn();
     this.destroy();
   }
 
   _escKeyDownHandler(evt) {
     if (evt.key === `Escape` || evt.key === `Esc`) {
       evt.preventDefault();
+      this._newEventBtn.enableBtn();
       this.destroy();
     }
   }

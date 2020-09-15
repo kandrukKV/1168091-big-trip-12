@@ -5,15 +5,17 @@ import EventListView from '../view/event-list';
 import NoEventsView from '../view/no-events';
 import SortView from '../view/events-sort';
 import LoadingView from '../view/loading';
+import NewEventBtnView from '../view/new-event-btn';
 import {filter} from "../utils/filter.js";
 import EventItemPresenter from '../presenter/event-item';
 import EventNewPresenter from '../presenter/event-new';
-import {SortType, UserAction, UpdateType, FilterType} from '../const';
+import {SortType, UserAction, UpdateType, FilterType, State} from '../const';
 import {distributeEventsByDays, sortByDate, sortByTime, sortByPrice, getDateDay} from '../utils/events';
 import {render, RenderPosition, remove} from '../utils/render';
 
 export default class Content {
-  constructor(parentContainer, eventsModel, detailsModel, filterModel, api) {
+  constructor(tripMainContainer, parentContainer, eventsModel, detailsModel, filterModel, api) {
+    this._tripMainContainer = tripMainContainer;
     this._parentContainer = parentContainer;
     this._eventsModel = eventsModel;
     this._detailsModel = detailsModel;
@@ -22,6 +24,7 @@ export default class Content {
 
     this._isLoading = true;
 
+    this._newEventBtn = new NewEventBtnView();
     this._contentList = new ContentListView();
     this._noEvents = new NoEventsView();
     this._sortPanel = new SortView();
@@ -35,14 +38,17 @@ export default class Content {
     this._handleViewAction = this._handleViewAction.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
     this._handleModelEvent = this._handleModelEvent.bind(this);
+    this._handlerCreateNewEvent = this._handlerCreateNewEvent.bind(this);
 
 
-    this._eventNewPresenter = new EventNewPresenter(this._sortPanel, this._handleViewAction, this._detailsModel);
+    this._eventNewPresenter = new EventNewPresenter(this._sortPanel, this._handleViewAction, this._detailsModel, this._newEventBtn);
   }
 
   init() {
     this._eventsModel.addObserver(this._handleModelEvent);
     this._filterModel.addObserver(this._handleModelEvent);
+    this._newEventBtn.setBtnClickHandler(this._handlerCreateNewEvent);
+    render(this._tripMainContainer, this._newEventBtn, RenderPosition.BEFOREEND);
     render(this._parentContainer, this._contentList, RenderPosition.BEFOREEND);
     this._renderSort();
     this._renderEvents();
@@ -59,7 +65,7 @@ export default class Content {
     this._currentSortType = sortType;
   }
 
-  createNewEvent() {
+  _handlerCreateNewEvent() {
     this._currentSortType = SortType.EVENT;
     this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
     this._eventNewPresenter.init();
@@ -156,16 +162,35 @@ export default class Content {
 
     switch (actionType) {
       case UserAction.UPDATE_EVENT:
+        this._eventItemPresenter[update.id].setViewState(State.SAVING);
         this._api.updateEvent(update)
           .then((response) => {
             this._eventsModel.updateEvent(updateType, response);
+          })
+          .catch(() => {
+            this._eventItemPresenter[update.id].setViewState(State.ABORTING);
           });
         break;
       case UserAction.ADD_EVENT:
-        this._eventsModel.addEvent(updateType, update);
+        this._eventNewPresenter.setSaving();
+        this._api.addEvent(update)
+          .then((response) => {
+            this._newEventBtn.enableBtn();
+            this._eventsModel.addEvent(updateType, response);
+          })
+          .catch(() => {
+            this._eventNewPresenter.setAborting();
+          });
         break;
       case UserAction.DELETE_EVENT:
-        this._eventsModel.deleteEvent(updateType, update);
+        this._eventItemPresenter[update.id].setViewState(State.DELETING);
+        this._api.deleteEvent(update)
+          .then(() => {
+            this._eventsModel.deleteEvent(updateType, update);
+          })
+          .catch(() => {
+            this._eventItemPresenter[update.id].setViewState(State.ABORTING);
+          });
         break;
     }
   }

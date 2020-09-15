@@ -14,7 +14,7 @@ const DEFAULT_ROUTE = {
   type: `flight`,
   beginDate: new Date().toISOString(),
   endDate: new Date().toISOString(),
-  price: ``,
+  price: 0,
   date: {
     start: {
       date: ``
@@ -49,7 +49,7 @@ const createDestinationTemplate = (destination) => {
   );
 };
 
-const createOffersTemplate = (offers) => {
+const createOffersTemplate = (offers, isDisabled) => {
   if (offers.length === 0) {
     return ``;
   }
@@ -57,7 +57,7 @@ const createOffersTemplate = (offers) => {
   const innerTemplate = offers.map((item, index) => {
     return (
       `<div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${index}" type="checkbox" name="event-offer-luggage" value="${item.title}" ${item.isChecked ? `checked` : ``}>
+        <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${index}" type="checkbox" name="event-offer-luggage" value="${item.title}" ${item.isChecked ? `checked` : ``} ${isDisabled ? `disabled` : ``}>
         <label class="event__offer-label" for="event-offer-luggage-${index}">
           <span class="event__offer-title">${item.title}</span>
           &plus;
@@ -85,23 +85,23 @@ const createCitiesTemplate = (cities) => {
   }).join(``);
 };
 
-const createEditButtonsBlockTemplate = (eventId, isFavorite, isEditMode, isDeleting) => {
+const createEditButtonsBlockTemplate = (eventId, isFavorite, isEditMode, isDeleting, isDisabled) => {
   if (isEditMode) {
     return (
-      `<button class="event__reset-btn" type="reset">${isDeleting ? `Deleting...` : `Delete`}</button>
-      <input id="event-favorite-${eventId}" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${isFavorite ? `checked` : ``}>
+      `<button class="event__reset-btn" type="reset" ${isDisabled ? `disabled` : ``}>${isDeleting ? `Deleting...` : `Delete`}</button>
+      <input id="event-favorite-${eventId}" class="event__favorite-checkbox  visually-hidden" type="checkbox" name="event-favorite" ${isFavorite ? `checked` : ``} ${isDisabled ? `disabled` : ``}>
       <label class="event__favorite-btn" for="event-favorite-${eventId}">
         <span class="visually-hidden">Add to favorite</span>
         <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
           <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"/>
         </svg>
       </label>
-      <button class="event__rollup-btn" type="button">
+      <button class="event__rollup-btn" type="button" ${isDisabled ? `disabled` : ``}>
         <span class="visually-hidden">Open event</span>
       </button>`
     );
   } else {
-    return `<button class="event__reset-btn" type="reset">Cancel</button>`;
+    return `<button class="event__reset-btn" type="reset" ${isDisabled ? `disabled` : ``}>Cancel</button>`;
   }
 };
 
@@ -119,21 +119,21 @@ const createEventEditFormTemplate = (destinations, route) => {
     isDestination,
     isNewEventMode,
     isSaving,
-    isDeleting
+    isDeleting,
+    isDisabled
   } = route;
 
   const isEditMode = isNewEventMode ? false : true;
   const cities = destinations.map((item) => item.name);
-  const currentCity = destination.name;
+  const currentCity = destination ? destination.name : ``;
   const newEventClass = isEditMode ? `` : NEW_EVENT_CLASS;
-  const eventEditBlock = createEditButtonsBlockTemplate(id, isFavorite, isEditMode, isDeleting);
+  const eventEditBlock = createEditButtonsBlockTemplate(id, isFavorite, isEditMode, isDeleting, isDisabled);
 
 
   const dateFrom = getFullDate(beginDate);
   const dateTo = getFullDate(endDate);
 
   const destinationTemplate = isDestination ? createDestinationTemplate(destination) : ``;
-
   return (
     `<form class="${newEventClass}event event--edit" action="#" method="post">
       <header class="event__header">
@@ -142,44 +142,44 @@ const createEventEditFormTemplate = (destinations, route) => {
             <span class="visually-hidden">Choose event type</span>
             <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
           </label>
-          <input class="event__type-toggle  visually-hidden" id="event-type-toggle-${id}" type="checkbox">
+          <input class="event__type-toggle  visually-hidden" id="event-type-toggle-${id}" type="checkbox" ${isDisabled ? `disabled` : ``}>
 
           <div class="event__type-list">
             <fieldset class="event__type-group">
               <legend class="visually-hidden">Transfer</legend>
 
               <div class="event__type-item">
-                <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi">
+                <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi" ${isDisabled ? `disabled` : ``}>
                 <label class="event__type-label  event__type-label--taxi" for="event-type-taxi-1">Taxi</label>
               </div>
 
               <div class="event__type-item">
-                <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus">
+                <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus" ${isDisabled ? `disabled` : ``}>
                 <label class="event__type-label  event__type-label--bus" for="event-type-bus-1">Bus</label>
               </div>
 
               <div class="event__type-item">
-                <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train">
+                <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train" ${isDisabled ? `disabled` : ``}>
                 <label class="event__type-label  event__type-label--train" for="event-type-train-1">Train</label>
               </div>
 
               <div class="event__type-item">
-                <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship">
+                <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship" ${isDisabled ? `disabled` : ``}>
                 <label class="event__type-label  event__type-label--ship" for="event-type-ship-1">Ship</label>
               </div>
 
               <div class="event__type-item">
-                <input id="event-type-transport-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="transport">
+                <input id="event-type-transport-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="transport" ${isDisabled ? `disabled` : ``}>
                 <label class="event__type-label  event__type-label--transport" for="event-type-transport-1">Transport</label>
               </div>
 
               <div class="event__type-item">
-                <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive">
+                <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive" ${isDisabled ? `disabled` : ``}>
                 <label class="event__type-label  event__type-label--drive" for="event-type-drive-1">Drive</label>
               </div>
 
               <div class="event__type-item">
-                <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight">
+                <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight" ${isDisabled ? `disabled` : ``}>
                 <label class="event__type-label  event__type-label--flight" for="event-type-flight-1">Flight</label>
               </div>
             </fieldset>
@@ -188,17 +188,17 @@ const createEventEditFormTemplate = (destinations, route) => {
               <legend class="visually-hidden">Activity</legend>
 
               <div class="event__type-item">
-                <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in">
+                <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in" ${isDisabled ? `disabled` : ``}>
                 <label class="event__type-label  event__type-label--check-in" for="event-type-check-in-1">Check-in</label>
               </div>
 
               <div class="event__type-item">
-                <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing">
+                <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing" ${isDisabled ? `disabled` : ``}>
                 <label class="event__type-label  event__type-label--sightseeing" for="event-type-sightseeing-1">Sightseeing</label>
               </div>
 
               <div class="event__type-item">
-                <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant">
+                <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant" ${isDisabled ? `disabled` : ``}>
                 <label class="event__type-label  event__type-label--restaurant" for="event-type-restaurant-1">Restaurant</label>
               </div>
             </fieldset>
@@ -207,7 +207,7 @@ const createEventEditFormTemplate = (destinations, route) => {
 
         <div class="event__field-group  event__field-group--destination">
           <label class="event__label  event__type-output" for="event-destination-${id}">${upFirstSymbol(type)} ${getPreposition(type)}</label>
-          <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${currentCity}" list="destination-list-${id}">
+          <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${currentCity}" list="destination-list-${id}" ${isDisabled ? `disabled` : ``}>
           <datalist id="destination-list-${id}">
             ${createCitiesTemplate(cities)}
           </datalist>
@@ -217,12 +217,12 @@ const createEventEditFormTemplate = (destinations, route) => {
           <label class="visually-hidden" for="event-start-time-${id}">
             From
           </label>
-          <input class="event__input  event__input--time" id="event-start-time-${id}" type="text" name="event-start-time" value="${dateFrom}">
+          <input class="event__input  event__input--time" id="event-start-time-${id}" type="text" name="event-start-time" value="${dateFrom}" ${isDisabled ? `disabled` : ``}>
           &mdash;
           <label class="visually-hidden" for="event-end-time-${id}">
             To
           </label>
-          <input class="event__input  event__input--time" id="event-end-time-${id}" type="text" name="event-end-time" value="${dateTo}">
+          <input class="event__input  event__input--time" id="event-end-time-${id}" type="text" name="event-end-time" value="${dateTo}" ${isDisabled ? `disabled` : ``}>
         </div>
 
         <div class="event__field-group  event__field-group--price">
@@ -230,14 +230,14 @@ const createEventEditFormTemplate = (destinations, route) => {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-${id}" type="number" name="event-price" value="${price}">
+          <input class="event__input  event__input--price" id="event-price-${id}" type="number" name="event-price" value="${price}" ${isDisabled ? `disabled` : ``}>
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit">${isSaving ? `Saving...` : `Save`}</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabled ? `disabled` : ``}>${isSaving ? `Saving...` : `Save`}</button>
         ${eventEditBlock}
       </header>
       <section class="event__details">
-        ${createOffersTemplate(offers, isOffersChecked)}
+        ${createOffersTemplate(offers, isOffersChecked, isDisabled)}
         ${destinationTemplate}
       </section>
     </form>`
@@ -321,17 +321,11 @@ export default class EditForm extends SmartView {
 
   _deleteEventHandler(evt) {
     evt.preventDefault();
-    this.updateData({
-      isDeleting: true
-    });
     this._callback.deleteEvent(EditForm.parseDataToEvent(this._data));
   }
 
   _submitHandler(evt) {
     evt.preventDefault();
-    this.updateData({
-      isSaving: true
-    });
     this._callback.submit(EditForm.parseDataToEvent(this._data));
   }
 
@@ -501,6 +495,7 @@ export default class EditForm extends SmartView {
     delete data.isNewEventMode;
     delete data.isSaving;
     delete data.isDeleting;
+    delete data.isDisabled;
 
     return data;
   }
@@ -517,6 +512,7 @@ export default class EditForm extends SmartView {
           isDestination: false,
           isSaving: false,
           isDeleting: false,
+          isDisabled: false,
           offers: newOffers.map((offer) => {
             return Object.assign(
                 {},

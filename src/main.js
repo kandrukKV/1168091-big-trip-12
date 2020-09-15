@@ -11,7 +11,7 @@ import Api from "./api.js";
 import {render, RenderPosition, remove} from './utils/render';
 
 const AUTHORIZATION = `Basic kandrukSyaDru`;
-const END_POINT = `https://12.ecmascript.pages.academy/big-trip/`;
+const END_POINT = `https://12.ecmascript.pages.academy/big-trip`;
 const siteTripMainElement = document.querySelector(`.trip-main`);
 const siteTripControlsElement = siteTripMainElement.querySelector(`.trip-main__trip-controls`);
 const siteMenuElement = siteTripMainElement.querySelector(`h2`);
@@ -31,15 +31,10 @@ const filterModel = new FilterModel();
 const filterPresenter = new FilterPresenter(siteTripControlsElement, filterModel, eventsModel);
 filterPresenter.init();
 
-const contentPresenter = new ContentPresenter(siteTripEventsElement, eventsModel, detailsModel, filterModel, api);
+const contentPresenter = new ContentPresenter(siteTripMainElement, siteTripEventsElement, eventsModel, detailsModel, filterModel, api);
 contentPresenter.init();
 
 const statisticComponent = new StatisticView();
-
-document.querySelector(`.trip-main__event-add-btn`).addEventListener(`click`, (evt) => {
-  evt.preventDefault();
-  contentPresenter.createNewEvent();
-});
 
 const handleSiteMenuClick = (menuItem) => {
   switch (menuItem) {
