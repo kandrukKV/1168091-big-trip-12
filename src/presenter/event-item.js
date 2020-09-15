@@ -2,12 +2,7 @@ import EventItemView from '../view/event-item';
 import EventView from '../view/event';
 import EventEditFormView from '../view/event-edit';
 import {render, replace, RenderPosition, remove} from '../utils/render';
-import {UserAction, UpdateType} from '../const';
-
-const Mode = {
-  DEFAULT: `DEFAULT`,
-  EDITING: `EDITING`
-};
+import {UserAction, UpdateType, State, Mode} from '../const';
 
 export default class EventItem {
   constructor(eventItemContainer, changeData, changeMode, detailsModel) {
@@ -55,12 +50,43 @@ export default class EventItem {
     }
 
     if (this._mode === Mode.EDITING) {
-      replace(this._eventEditForm, prevEventEditForm);
+      // replace(this._eventEditForm, prevEventEditForm);
+      replace(this._event, prevEventEditForm);
+      this._mode = Mode.DEFAULT;
     }
 
     remove(prevEvent);
     remove(prevEventEditForm);
 
+  }
+
+  setViewState(state) {
+    const resetFormState = () => {
+      this._eventEditForm.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false
+      });
+    };
+
+    switch (state) {
+      case State.SAVING:
+        this._eventEditForm.updateData({
+          isDisabled: true,
+          isSaving: true
+        });
+        break;
+      case State.DELETING:
+        this._eventEditForm.updateData({
+          isDisabled: true,
+          isDeleting: true
+        });
+        break;
+      case State.ABORTING:
+        this._event.shake(resetFormState);
+        this._eventEditForm.shake(resetFormState);
+        break;
+    }
   }
 
   setFavorite(isFavorite) {
@@ -108,8 +134,6 @@ export default class EventItem {
         UpdateType.MAJOR,
         route
     );
-    // this._replaceFormToEvent();
-    // document.removeEventListener(`keydown`, this._escKeyDownHandler);
   }
 
   _deleteFormHandler(route) {

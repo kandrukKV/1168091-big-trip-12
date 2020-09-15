@@ -33,3 +33,14 @@ export const Preposition = {
   SIGHTSEEING: `Sightseeing`,
   RESTAURANT: `Restaurant`
 };
+
+export const State = {
+  SAVING: `SAVING`,
+  DELETING: `DELETING`
+};
+
+export const Mode = {
+  DEFAULT: `DEFAULT`,
+  EDITING: `EDITING`,
+  ABORTING: `ABORTING`
+};
