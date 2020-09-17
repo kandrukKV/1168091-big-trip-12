@@ -115,7 +115,6 @@ const createEventEditFormTemplate = (destinations, route) => {
     isFavorite,
     destination,
     offers,
-    isOffersChecked,
     isDestination,
     isNewEventMode,
     isSaving,
