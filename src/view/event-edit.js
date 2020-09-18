@@ -115,7 +115,6 @@ const createEventEditFormTemplate = (destinations, route) => {
     isFavorite,
     destination,
     offers,
-    isOffersChecked,
     isDestination,
     isNewEventMode,
     isSaving,
@@ -128,6 +127,7 @@ const createEventEditFormTemplate = (destinations, route) => {
   const currentCity = destination ? destination.name : ``;
   const newEventClass = isEditMode ? `` : NEW_EVENT_CLASS;
   const eventEditBlock = createEditButtonsBlockTemplate(id, isFavorite, isEditMode, isDeleting, isDisabled);
+  const offersTemplate = createOffersTemplate(offers, isDisabled);
 
 
   const dateFrom = getFullDate(beginDate);
@@ -237,7 +237,7 @@ const createEventEditFormTemplate = (destinations, route) => {
         ${eventEditBlock}
       </header>
       <section class="event__details">
-        ${createOffersTemplate(offers, isOffersChecked, isDisabled)}
+        ${offersTemplate}
         ${destinationTemplate}
       </section>
     </form>`
@@ -421,7 +421,9 @@ export default class EditForm extends SmartView {
   setFavorite(isFavorite) {
     this._event.isFavorite = isFavorite;
     this.updateData({
-      isFavorite
+      isFavorite,
+      isDisabled: false,
+      isSaving: false
     });
   }
 
