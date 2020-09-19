@@ -2,12 +2,10 @@ import AbstractView from './abstract';
 import {upFirstSymbol} from '../utils/events';
 
 const createFiltersItem = (filter, currentFilter) => {
-
-
   return (
     ` <div class="trip-filters__filter">
-      <input id="filter-${filter}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${filter}" ${filter === currentFilter ? `checked` : ``}>
-      <label class="trip-filters__filter-label" for="filter-${filter}">${upFirstSymbol(filter)}</label>
+      <input id="filter-${filter.name}" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="${filter.name}" ${filter.name === currentFilter ? `checked` : ``} ${filter.isActive ? `` : `disabled`}>
+      <label class="trip-filters__filter-label" for="filter-${filter.name}">${upFirstSymbol(filter.name)}</label>
     </div>`
   );
 };
