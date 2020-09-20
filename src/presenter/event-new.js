@@ -57,7 +57,6 @@ export default class EventNew {
         isDeleting: false
       });
     };
-
     this._eventNewComponent.shake(resetFormState);
   }
 

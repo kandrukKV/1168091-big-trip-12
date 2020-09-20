@@ -50,7 +50,6 @@ export default class EventItem {
     }
 
     if (this._mode === Mode.EDITING) {
-      // replace(this._eventEditForm, prevEventEditForm);
       replace(this._event, prevEventEditForm);
       this._mode = Mode.DEFAULT;
     }
@@ -128,13 +127,14 @@ export default class EventItem {
     document.removeEventListener(`keydown`, this._escKeyDownHandler);
   }
 
-  _editFormSubmitHandler(route) {
+  _editFormSubmitHandler(event) {
     this._changeData(
         UserAction.UPDATE_EVENT,
         UpdateType.MAJOR,
-        route
+        event
     );
   }
+
 
   _deleteFormHandler(route) {
     this._changeData(

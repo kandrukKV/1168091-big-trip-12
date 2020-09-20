@@ -1,6 +1,5 @@
 import AbstractView from './abstract';
-import {getPreposition} from '../utils/common';
-import {getDuration, upFirstSymbol, getTime, getDateForForm} from '../utils/events';
+import {getPreposition, getDuration, upFirstSymbol, getTime, getDateForForm} from '../utils/events';
 
 const OFFERS_COUNT = 3;
 
