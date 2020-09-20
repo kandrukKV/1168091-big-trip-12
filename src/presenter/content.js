@@ -57,6 +57,7 @@ export default class Content {
   destroy() {
     this._eventsModel.removeObserver(this._handleModelEvent);
     this._filterModel.removeObserver(this._handleModelEvent);
+    this._newEventBtn.enableBtn();
     remove(this._sortPanel);
     this._clearContentList();
   }
@@ -132,7 +133,6 @@ export default class Content {
       this._renderNoEvent();
       return;
     }
-
     if (this._currentSortType === SortType.EVENT) {
       distributeEventsByDays(this._getEvents().slice())
         .forEach((oneDayEvents, i) => {
@@ -175,8 +175,8 @@ export default class Content {
         this._eventNewPresenter.setSaving();
         this._api.addEvent(update)
           .then((response) => {
-            this._newEventBtn.enableBtn();
             this._eventsModel.addEvent(updateType, response);
+            this._newEventBtn.enableBtn();
           })
           .catch(() => {
             this._eventNewPresenter.setAborting();

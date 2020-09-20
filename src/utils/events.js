@@ -1,4 +1,5 @@
 import moment from 'moment';
+import {Preposition} from '../const';
 
 const MONTHS = [`JAN`, `FEB`, `MAR`, `APR`, `MAY`, `JUN`, `JUL`, `AUG`, `SEP`, `OCT`, `NOV`, `DEC`];
 
@@ -9,6 +10,10 @@ export const getDuration = (beginDate, endDate) => {
   const hours = `${addZerro(duration.hours())}H `;
   const minutes = `${addZerro(duration.minutes())}M`;
   return `${day}${hours}${minutes}`;
+};
+
+export const getPreposition = (type) => {
+  return (type === Preposition.CHECK_IN || type === Preposition.SIGHTSEEING || type === Preposition.RESTAURANT) ? ` in ` : ` to `;
 };
 
 export const getFullDate = (date) => {
@@ -49,9 +54,9 @@ export const sortByDate = (a, b) => {
 };
 
 export const sortByTime = (a, b) => {
-  const durationA = parseInt(getUnixTime(a.endDate), 10) - parseInt(getUnixTime(a.beginDate), 10);
-  const durationB = parseInt(getUnixTime(a.endDate), 10) - parseInt(getUnixTime(b.beginDate), 10);
-  return durationA > durationB ? 1 : -1;
+  const diffA = moment(a.endDate).diff(moment(a.beginDate));
+  const diffB = moment(b.endDate).diff(moment(b.beginDate));
+  return diffA > diffB ? 1 : -1;
 };
 
 export const sortByPrice = (a, b) => {

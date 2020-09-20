@@ -29,9 +29,9 @@ export const MenuItem = {
 };
 
 export const Preposition = {
-  CHECK_IN: `Check-in`,
-  SIGHTSEEING: `Sightseeing`,
-  RESTAURANT: `Restaurant`
+  CHECK_IN: `check-in`,
+  SIGHTSEEING: `sightseeing`,
+  RESTAURANT: `restaurant`
 };
 
 export const State = {

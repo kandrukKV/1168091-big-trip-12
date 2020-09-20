@@ -1,6 +1,5 @@
 import SmartView from './smart';
-import {getPreposition} from '../utils/common';
-import {upFirstSymbol, getFullDate} from '../utils/events';
+import {getPreposition, upFirstSymbol, getFullDate} from '../utils/events';
 
 import flatpickr from 'flatpickr';
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
@@ -357,7 +356,6 @@ export default class EditForm extends SmartView {
       let type = evt.target.value;
       this.updateData({
         type,
-        price: 0,
         destination: {
           name: ``
         },

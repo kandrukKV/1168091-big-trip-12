@@ -31,6 +31,10 @@ export default class Events extends Observer {
   }
 
   addEvent(updateType, update) {
+    if (update.errors) {
+      throw new Error(`Can't add event`);
+    }
+
     this._events = [
       update,
       ...this._events
