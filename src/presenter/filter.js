@@ -1,6 +1,7 @@
 import FiltersView from '../view/trip-filtres';
 import {render, RenderPosition, replace, remove} from '../utils/render';
 import {FilterType, UpdateType} from "../const.js";
+import {filter} from "../utils/filter.js";
 
 export default class Filter {
   constructor(filterContainer, filterModel, eventsModel) {
@@ -50,6 +51,20 @@ export default class Filter {
   }
 
   _getFilters() {
-    return [FilterType.EVERYTHING, FilterType.FUTURE, FilterType.PAST];
+    const events = this._eventsModel.getEvents();
+    return [
+      {
+        name: FilterType.EVERYTHING,
+        isActive: filter[FilterType.EVERYTHING](events).length > 0 ? true : false
+      },
+      {
+        name: FilterType.FUTURE,
+        isActive: filter[FilterType.FUTURE](events).length > 0 ? true : false
+      },
+      {
+        name: FilterType.PAST,
+        isActive: filter[FilterType.PAST](events).length > 0 ? true : false
+      }
+    ];
   }
 }
