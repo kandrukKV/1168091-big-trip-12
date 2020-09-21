@@ -349,7 +349,7 @@ export default class EditForm extends SmartView {
 
   _typeChangeHandler(evt) {
     if (evt.target.name === `event-type`) {
-      let type = evt.target.value;
+      const type = evt.target.value;
       this.updateData({
         type,
         destination: {
