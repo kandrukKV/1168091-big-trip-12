@@ -5,7 +5,6 @@ import EventListView from '../view/event-list';
 import NoEventsView from '../view/no-events';
 import SortView from '../view/events-sort';
 import LoadingView from '../view/loading';
-import NewEventBtnView from '../view/new-event-btn';
 import {filter} from "../utils/filter.js";
 import EventItemPresenter from '../presenter/event-item';
 import EventNewPresenter from '../presenter/event-new';
@@ -14,7 +13,7 @@ import {distributeEventsByDays, sortByDate, sortByTime, sortByPrice, getDateDay}
 import {render, RenderPosition, remove} from '../utils/render';
 
 export default class Content {
-  constructor(tripMainContainer, parentContainer, eventsModel, detailsModel, filterModel, api) {
+  constructor(tripMainContainer, parentContainer, eventsModel, detailsModel, filterModel, api, newBtn) {
     this._tripMainContainer = tripMainContainer;
     this._parentContainer = parentContainer;
     this._eventsModel = eventsModel;
@@ -24,7 +23,7 @@ export default class Content {
 
     this._isLoading = true;
 
-    this._newEventBtn = new NewEventBtnView();
+    this._newEventBtn = newBtn;
     this._contentList = new ContentListView();
     this._noEvents = new NoEventsView();
     this._sortPanel = new SortView();
@@ -57,7 +56,6 @@ export default class Content {
   destroy() {
     this._eventsModel.removeObserver(this._handleModelEvent);
     this._filterModel.removeObserver(this._handleModelEvent);
-    this._newEventBtn.enableBtn();
     remove(this._sortPanel);
     this._clearContentList();
   }
@@ -104,6 +102,7 @@ export default class Content {
 
   _handleSortTypeChange(sortType) {
     this._currentSortType = sortType;
+    this._newEventBtn.enableBtn();
     this._clearContentList();
     this._renderEvents();
   }

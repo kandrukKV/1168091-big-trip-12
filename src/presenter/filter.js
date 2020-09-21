@@ -4,10 +4,11 @@ import {FilterType, UpdateType} from "../const.js";
 import {filter} from "../utils/filter.js";
 
 export default class Filter {
-  constructor(filterContainer, filterModel, eventsModel) {
+  constructor(filterContainer, filterModel, eventsModel, newBtn) {
     this._filterContainer = filterContainer;
     this._filterModel = filterModel;
     this._eventsModel = eventsModel;
+    this._newBtn = newBtn;
     this._currentFilter = null;
 
     this._filterComponent = null;
@@ -48,6 +49,7 @@ export default class Filter {
     }
 
     this._filterModel.setFilter(UpdateType.MAJOR, filterType);
+    this._newBtn.enableBtn();
   }
 
   _getFilters() {

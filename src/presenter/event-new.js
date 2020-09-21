@@ -35,7 +35,6 @@ export default class EventNew {
     if (this._eventNewComponent === null) {
       return;
     }
-
     remove(this._eventNewComponent);
     this._eventNewComponent = null;
 
