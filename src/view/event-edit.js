@@ -14,14 +14,6 @@ const DEFAULT_ROUTE = {
   beginDate: new Date().toISOString(),
   endDate: new Date().toISOString(),
   price: 0,
-  date: {
-    start: {
-      date: ``
-    },
-    end: {
-      date: ``
-    }
-  },
   offers: [],
   isFavorite: false,
   isNewEventMode: true
@@ -325,6 +317,10 @@ export default class EditForm extends SmartView {
 
   _submitHandler(evt) {
     evt.preventDefault();
+    if (!this._data.destination || !this._data.destination.name) {
+      this.shake(()=>{});
+      return;
+    }
     this._callback.submit(EditForm.parseDataToEvent(this._data));
   }
 

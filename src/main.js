@@ -1,6 +1,7 @@
 import ContentPresenter from './presenter/content';
 import SiteMenuView from './view/site-menu';
 import StatisticView from './view/statistic';
+import NewEventBtnView from './view/new-event-btn';
 import TripInfoPresenter from './presenter/trip-info';
 import EventsModel from './model/events';
 import DetailsModel from './model/details';
@@ -12,7 +13,7 @@ import {render, RenderPosition, remove} from './utils/render';
 import Store from './api/store.js';
 import Provider from './api/provider.js';
 
-const AUTHORIZATION = `Basic kandrukSyaDru`;
+const AUTHORIZATION = `Basic kandrukSyaDruV1`;
 const END_POINT = `https://12.ecmascript.pages.academy/big-trip`;
 const STORE_PREFIX = `big-trip-localstorage`;
 
@@ -48,11 +49,13 @@ const siteMenuComponent = new SiteMenuView();
 const tripInfoPresenter = new TripInfoPresenter(siteTripMainElement, eventsModel);
 tripInfoPresenter.init();
 
+const newBtn = new NewEventBtnView();
+
 const filterModel = new FilterModel();
-const filterPresenter = new FilterPresenter(siteTripControlsElement, filterModel, eventsModel);
+const filterPresenter = new FilterPresenter(siteTripControlsElement, filterModel, eventsModel, newBtn);
 filterPresenter.init();
 
-const contentPresenter = new ContentPresenter(siteTripMainElement, siteTripEventsElement, eventsModel, detailsModel, filterModel, apiWithProvider);
+const contentPresenter = new ContentPresenter(siteTripMainElement, siteTripEventsElement, eventsModel, detailsModel, filterModel, apiWithProvider, newBtn);
 contentPresenter.init();
 
 const statisticComponent = new StatisticView();
@@ -60,12 +63,14 @@ const statisticComponent = new StatisticView();
 const handleSiteMenuClick = (menuItem) => {
   switch (menuItem) {
     case MenuItem.TABLE:
+      newBtn.enableBtn();
       remove(statisticComponent);
       filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
       contentPresenter.setSortType(SortType.EVENT);
       contentPresenter.init();
       break;
     case MenuItem.STATS:
+      newBtn.disabledBtn();
       contentPresenter.destroy();
       render(siteTripEventsElement, statisticComponent, RenderPosition.AFTEREND);
       statisticComponent.setCharts(eventsModel.getEvents());
