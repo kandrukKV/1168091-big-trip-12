@@ -49,7 +49,7 @@ export const getTimeSpentStat = (events) => {
 
   });
 
-  for (let key in data) {
+  for (const key in data) {
     if (data[key]) {
       data[key] = (data[key] / 36000000).toFixed(2);
     }
