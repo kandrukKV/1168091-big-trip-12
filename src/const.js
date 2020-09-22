@@ -44,3 +44,9 @@ export const Mode = {
   EDITING: `EDITING`,
   ABORTING: `ABORTING`
 };
+
+export const StatisticLabel = {
+  MONEY: `MONEY`,
+  TRANSPORT: `TRANSPORT`,
+  TIME_SPENT: `TIME SPENT`
+};

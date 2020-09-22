@@ -245,12 +245,10 @@ export default class EditForm extends SmartView {
     this._destinations = destinations;
 
 
-    this._data = EditForm.parseEventToData(event, this._allOffers);
+    this._componentData = EditForm.parseEventToData(event, this._allOffers);
 
     this._startDatepicker = null;
     this._endDatepicker = null;
-
-    this._details = details;
 
     this._submitHandler = this._submitHandler.bind(this);
     this._favoritChangeHandler = this._favoritChangeHandler.bind(this);
@@ -270,7 +268,7 @@ export default class EditForm extends SmartView {
   }
 
   getTemplate() {
-    return createEventEditFormTemplate(this._destinations, this._data);
+    return createEventEditFormTemplate(this._destinations, this._componentData);
   }
 
   _setStartDatepicker() {
@@ -279,7 +277,7 @@ export default class EditForm extends SmartView {
         {
           enableTime: true,
           dateFormat: `y/m/d H:i`,
-          defaultDate: this._data.beginDate,
+          defaultDate: this._componentData.beginDate,
           onChange: this._startDateChangeHandler
         }
     );
@@ -291,8 +289,8 @@ export default class EditForm extends SmartView {
         {
           enableTime: true,
           dateFormat: `y/m/d H:i`,
-          defaultDate: this._data.endDate,
-          minDate: this._data.beginDate,
+          defaultDate: this._componentData.endDate,
+          minDate: this._componentData.beginDate,
           onChange: this._endDateChangeHandler
         }
     );
@@ -312,16 +310,16 @@ export default class EditForm extends SmartView {
 
   _deleteEventHandler(evt) {
     evt.preventDefault();
-    this._callback.deleteEvent(EditForm.parseDataToEvent(this._data));
+    this._callback.deleteEvent(EditForm.parseDataToEvent(this._componentData));
   }
 
   _submitHandler(evt) {
     evt.preventDefault();
-    if (!this._data.destination || !this._data.destination.name) {
+    if (!this._componentData.destination || !this._componentData.destination.name) {
       this.shake(()=>{});
       return;
     }
-    this._callback.submit(EditForm.parseDataToEvent(this._data));
+    this._callback.submit(EditForm.parseDataToEvent(this._componentData));
   }
 
   _favoritChangeHandler(evt) {
@@ -381,7 +379,7 @@ export default class EditForm extends SmartView {
 
   _offersChangeHandler(evt) {
     this.updateData({
-      offers: this._data.offers.map((offer) => {
+      offers: this._componentData.offers.map((offer) => {
         if (offer.title === evt.target.value) {
           offer.isChecked = evt.target.checked;
         }
@@ -437,7 +435,7 @@ export default class EditForm extends SmartView {
 
   setFavoritChangeHandler(callback) {
     this._callback.favoritChange = callback;
-    if (!this._data.isNewEventMode) {
+    if (!this._componentData.isNewEventMode) {
       this.getElement().addEventListener(`change`, this._favoritChangeHandler);
     }
   }
@@ -449,7 +447,7 @@ export default class EditForm extends SmartView {
 
   setArrowUpClickHandler(callback) {
     this._callback.arrowUp = callback;
-    if (!this._data.isNewEventMode) {
+    if (!this._componentData.isNewEventMode) {
       this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._arrowUpHandler);
     }
   }
@@ -472,12 +470,12 @@ export default class EditForm extends SmartView {
     this._setEndDatepicker();
   }
 
-  static parseDataToEvent(data) {
-    data = Object.assign(
+  static parseDataToEvent(modifiedData) {
+    modifiedData = Object.assign(
         {},
-        data,
+        modifiedData,
         {
-          offers: data.offers
+          offers: modifiedData.offers
             .filter((offer) => offer.isChecked === true)
             .map((offer) => {
               delete offer.isChecked;
@@ -486,14 +484,14 @@ export default class EditForm extends SmartView {
         }
     );
 
-    delete data.isOffersChecked;
-    delete data.isDestination;
-    delete data.isNewEventMode;
-    delete data.isSaving;
-    delete data.isDeleting;
-    delete data.isDisabled;
+    delete modifiedData.isOffersChecked;
+    delete modifiedData.isDestination;
+    delete modifiedData.isNewEventMode;
+    delete modifiedData.isSaving;
+    delete modifiedData.isDeleting;
+    delete modifiedData.isDisabled;
 
-    return data;
+    return modifiedData;
   }
 
   static parseEventToData(event, allOffers) {

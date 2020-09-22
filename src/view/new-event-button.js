@@ -6,7 +6,7 @@ const createNewEventBtn = (isDisabled) => {
   );
 };
 
-export default class NewEventBtn extends SmartView {
+export default class NewEventButton extends SmartView {
   constructor() {
     super();
     this._isDisabled = false;
@@ -17,17 +17,17 @@ export default class NewEventBtn extends SmartView {
     return createNewEventBtn(this._isDisabled);
   }
 
-  disabledBtn() {
+  disable() {
     this._isDisabled = true;
     this.updateElement();
   }
 
-  enableBtn() {
+  enable() {
     this._isDisabled = false;
     this.updateElement();
   }
 
-  setBtnClickHandler(callback) {
+  setClickHandler(callback) {
     this._callback.btnClick = callback;
     this.getElement().addEventListener(`click`, this._btnClickHandler);
   }
@@ -38,7 +38,7 @@ export default class NewEventBtn extends SmartView {
 
   _btnClickHandler(evt) {
     evt.preventDefault();
-    this.disabledBtn();
+    this.disable();
     this._callback.btnClick();
   }
 }

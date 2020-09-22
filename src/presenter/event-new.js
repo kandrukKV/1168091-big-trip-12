@@ -21,7 +21,7 @@ export default class EventNew {
       return;
     }
 
-    this._eventNewComponent = new EventEditFormView(this._detailsModel.getDetails());
+    this._eventNewComponent = new EventEditFormView(this._detailsModel.get());
 
     this._eventNewComponent.setSubmitHandler(this._handleFormSubmit);
     this._eventNewComponent.setCancelHandler(this._handleCancelClick);
@@ -69,14 +69,14 @@ export default class EventNew {
   }
 
   _handleCancelClick() {
-    this._newEventBtn.enableBtn();
+    this._newEventBtn.enable();
     this.destroy();
   }
 
   _escKeyDownHandler(evt) {
     if (evt.key === `Escape` || evt.key === `Esc`) {
       evt.preventDefault();
-      this._newEventBtn.enableBtn();
+      this._newEventBtn.enable();
       this.destroy();
     }
   }

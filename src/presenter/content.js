@@ -13,7 +13,7 @@ import {distributeEventsByDays, sortByDate, sortByTime, sortByPrice, getDateDay}
 import {render, RenderPosition, remove} from '../utils/render';
 
 export default class Content {
-  constructor(tripMainContainer, parentContainer, eventsModel, detailsModel, filterModel, api, newBtn) {
+  constructor(tripMainContainer, parentContainer, eventsModel, detailsModel, filterModel, api, newButton) {
     this._tripMainContainer = tripMainContainer;
     this._parentContainer = parentContainer;
     this._eventsModel = eventsModel;
@@ -23,7 +23,7 @@ export default class Content {
 
     this._isLoading = true;
 
-    this._newEventBtn = newBtn;
+    this._newEventButton = newButton;
     this._contentList = new ContentListView();
     this._noEvents = new NoEventsView();
     this._sortPanel = new SortView();
@@ -40,14 +40,14 @@ export default class Content {
     this._handlerCreateNewEvent = this._handlerCreateNewEvent.bind(this);
 
 
-    this._eventNewPresenter = new EventNewPresenter(this._sortPanel, this._handleViewAction, this._detailsModel, this._newEventBtn);
+    this._eventNewPresenter = new EventNewPresenter(this._sortPanel, this._handleViewAction, this._detailsModel, this._newEventButton);
   }
 
   init() {
     this._eventsModel.addObserver(this._handleModelEvent);
     this._filterModel.addObserver(this._handleModelEvent);
-    this._newEventBtn.setBtnClickHandler(this._handlerCreateNewEvent);
-    render(this._tripMainContainer, this._newEventBtn, RenderPosition.BEFOREEND);
+    this._newEventButton.setClickHandler(this._handlerCreateNewEvent);
+    render(this._tripMainContainer, this._newEventButton, RenderPosition.BEFOREEND);
     render(this._parentContainer, this._contentList, RenderPosition.BEFOREEND);
     this._renderSort();
     this._renderEvents();
@@ -66,14 +66,14 @@ export default class Content {
 
   _handlerCreateNewEvent() {
     this._currentSortType = SortType.EVENT;
-    this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+    this._filterModel.set(UpdateType.MAJOR, FilterType.EVERYTHING);
     this._eventNewPresenter.init();
   }
 
   _getEvents() {
 
-    const filterType = this._filterModel.getFilter();
-    const events = this._eventsModel.getEvents();
+    const filterType = this._filterModel.get();
+    const events = this._eventsModel.get();
     const filtredEvents = filter[filterType](events);
 
     switch (this._currentSortType) {
@@ -102,7 +102,7 @@ export default class Content {
 
   _handleSortTypeChange(sortType) {
     this._currentSortType = sortType;
-    this._newEventBtn.enableBtn();
+    this._newEventButton.enable();
     this._clearContentList();
     this._renderEvents();
   }
@@ -175,7 +175,7 @@ export default class Content {
         this._api.addEvent(update)
           .then((response) => {
             this._eventsModel.addEvent(updateType, response);
-            this._newEventBtn.enableBtn();
+            this._newEventButton.enable();
           })
           .catch(() => {
             this._eventNewPresenter.setAborting();
@@ -194,11 +194,11 @@ export default class Content {
     }
   }
 
-  _handleModelEvent(updateType, data) {
+  _handleModelEvent(updateType, event) {
     // обработчик реагирует на изменение модели
     switch (updateType) {
       case UpdateType.PATCH:
-        this._eventItemPresenter[data.id].setFavorite(data.isFavorite);
+        this._eventItemPresenter[event.id].setFavorite(event.isFavorite);
         break;
       case UpdateType.MAJOR:
         this._clearContentList();
