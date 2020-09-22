@@ -1,7 +1,7 @@
 import TripInfoView from '../view/trip-info';
 import {render, RenderPosition, replace, remove} from '../utils/render';
 
-export default class TripInfoPresenter {
+export default class TripInfo {
   constructor(parentContainer, eventsModel) {
     this._parentContainer = parentContainer;
     this._eventsModel = eventsModel;
@@ -11,7 +11,7 @@ export default class TripInfoPresenter {
   }
 
   init() {
-    const events = this._eventsModel.getEvents();
+    const events = this._eventsModel.get();
     const prevTripInfoComponent = this._tripInfoComponent;
 
     this._tripInfoComponent = new TripInfoView(events);

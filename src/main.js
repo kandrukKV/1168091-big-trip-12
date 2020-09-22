@@ -1,7 +1,7 @@
 import ContentPresenter from './presenter/content';
 import SiteMenuView from './view/site-menu';
 import StatisticView from './view/statistic';
-import NewEventBtnView from './view/new-event-btn';
+import NewEventButtonView from './view/new-event-button';
 import TripInfoPresenter from './presenter/trip-info';
 import EventsModel from './model/events';
 import DetailsModel from './model/details';
@@ -46,16 +46,15 @@ const detailsModel = new DetailsModel();
 
 const siteMenuComponent = new SiteMenuView();
 
-const tripInfoPresenter = new TripInfoPresenter(siteTripMainElement, eventsModel);
-tripInfoPresenter.init();
+new TripInfoPresenter(siteTripMainElement, eventsModel).init();
 
-const newBtn = new NewEventBtnView();
+const newEventButton = new NewEventButtonView();
 
 const filterModel = new FilterModel();
-const filterPresenter = new FilterPresenter(siteTripControlsElement, filterModel, eventsModel, newBtn);
-filterPresenter.init();
 
-const contentPresenter = new ContentPresenter(siteTripMainElement, siteTripEventsElement, eventsModel, detailsModel, filterModel, apiWithProvider, newBtn);
+new FilterPresenter(siteTripControlsElement, filterModel, eventsModel, newEventButton).init();
+
+const contentPresenter = new ContentPresenter(siteTripMainElement, siteTripEventsElement, eventsModel, detailsModel, filterModel, apiWithProvider, newEventButton);
 contentPresenter.init();
 
 const statisticComponent = new StatisticView();
@@ -63,29 +62,29 @@ const statisticComponent = new StatisticView();
 const handleSiteMenuClick = (menuItem) => {
   switch (menuItem) {
     case MenuItem.TABLE:
-      newBtn.enableBtn();
+      newEventButton.enable();
       remove(statisticComponent);
-      filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+      filterModel.set(UpdateType.MAJOR, FilterType.EVERYTHING);
       contentPresenter.setSortType(SortType.EVENT);
       contentPresenter.init();
       break;
     case MenuItem.STATS:
-      newBtn.disabledBtn();
+      newEventButton.disable();
       contentPresenter.destroy();
       render(siteTripEventsElement, statisticComponent, RenderPosition.AFTEREND);
-      statisticComponent.setCharts(eventsModel.getEvents());
+      statisticComponent.setCharts(eventsModel.get());
       break;
   }
 };
 
 apiWithProvider.getAllData()
   .then((allData) => {
-    detailsModel.setDetails({
+    detailsModel.set({
       destinations: allData[1],
       offers: allData[2]
     });
     render(siteMenuElement, siteMenuComponent, RenderPosition.AFTEREND);
-    eventsModel.setEvents(UpdateType.INIT, allData[0]);
+    eventsModel.set(UpdateType.INIT, allData[0]);
   });
 
 siteMenuComponent.setMenuClickHandler(handleSiteMenuClick);

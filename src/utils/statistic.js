@@ -1,62 +1,68 @@
 import {Preposition} from '../const';
 
+const HOUR_FACTOR = 36000000;
+const TRANSPORT_STATISTIC_INCREMENT = 1;
+
+const increaseObjectProperty = (object, key, increment) => {
+  return object[key] ? object[key] + increment : increment;
+};
+
 export const getMoneyStat = (events) => {
 
-  const data = {};
+  const moneyStatistic = {};
 
   events.forEach((event) => {
-    data[event.type.toUpperCase()] = data[event.type.toUpperCase()]
-      ? parseInt(data[event.type.toUpperCase()], 10) + parseInt(event.price, 10)
-      : parseInt(event.price, 10);
+    const key = event.type.toUpperCase();
+
+    moneyStatistic[key] = increaseObjectProperty(moneyStatistic, key, parseInt(event.price, 10));
   });
 
   return {
-    types: Object.keys(data),
-    values: Object.values(data)
+    types: Object.keys(moneyStatistic),
+    values: Object.values(moneyStatistic)
   };
 };
 
 export const getTransportStat = (events) => {
-  const data = {};
+  const transportStatistic = {};
 
   events.forEach((event) => {
     if (event.type !== Preposition.CHECK_IN
       || event.type !== Preposition.SIGHTSEEING
       || event.type !== Preposition.RESTAURANT) {
 
-      data[event.type.toUpperCase()] = data[event.type.toUpperCase()]
-        ? parseInt(data[event.type.toUpperCase()], 10) + 1
-        : 1;
+      const key = event.type.toUpperCase();
+
+      transportStatistic[key] = increaseObjectProperty(transportStatistic, key, TRANSPORT_STATISTIC_INCREMENT);
     }
 
   });
   return {
-    types: Object.keys(data),
-    values: Object.values(data)
+    types: Object.keys(transportStatistic),
+    values: Object.values(transportStatistic)
   };
 };
 
 export const getTimeSpentStat = (events) => {
-  const data = {};
+  const timeStatistic = {};
+
   events.forEach((event) => {
     const startTime = new Date(event.beginDate).getTime();
     const endTime = new Date(event.endDate).getTime();
     const diff = endTime - startTime;
+    const key = event.type.toUpperCase();
 
-    data[event.type.toUpperCase()] = data[event.type.toUpperCase()]
-      ? data[event.type.toUpperCase()] + diff
-      : diff;
-
+    timeStatistic[key] = increaseObjectProperty(timeStatistic, key, diff);
   });
 
-  for (const key in data) {
-    if (data[key]) {
-      data[key] = (data[key] / 36000000).toFixed(2);
+  for (const key in timeStatistic) {
+    if (timeStatistic[key]) {
+      timeStatistic[key] = (timeStatistic[key] / HOUR_FACTOR).toFixed(2);
     }
   }
   return {
-    types: Object.keys(data),
-    values: Object.values(data)
+    types: Object.keys(timeStatistic),
+    values: Object.values(timeStatistic)
   };
 };
 

@@ -6,11 +6,11 @@ export default class Details extends Observer {
     this._details = {};
   }
 
-  setDetails(details) {
+  set(details) {
     this._details = details;
   }
 
-  getDetails() {
+  get() {
     return this._details;
   }
 }

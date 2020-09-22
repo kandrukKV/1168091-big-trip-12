@@ -44,11 +44,11 @@ export default class Api {
   }
 
   updateEvent(event) {
-    const data = EventsModel.adaptToServer(event);
+    const dataForServer = EventsModel.adaptToServer(event);
     return this._load({
       url: `points/${event.id}`,
       method: Method.PUT,
-      body: JSON.stringify(data),
+      body: JSON.stringify(dataForServer),
       headers: new Headers({"Content-Type": `application/json`})
     })
       .then(Api.toJSON)
@@ -73,11 +73,11 @@ export default class Api {
     });
   }
 
-  sync(data) {
+  sync(events) {
     return this._load({
       url: `points/sync`,
       method: Method.POST,
-      body: JSON.stringify(data),
+      body: JSON.stringify(events),
       headers: new Headers({"Content-Type": `application/json`})
     })
       .then(Api.toJSON);

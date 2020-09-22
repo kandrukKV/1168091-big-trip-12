@@ -9,7 +9,7 @@ export default class EventItem {
     this._eventItemContainer = eventItemContainer;
     this._detailsModel = detailsModel;
     this._changeData = changeData;
-    this._details = this._detailsModel.getDetails();
+    this._details = this._detailsModel.get();
     this._route = null;
     this._eventItem = new EventItemView();
     this._event = null;
